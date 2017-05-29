@@ -187,6 +187,17 @@ pub fn encode_bytes(data: &[u8]) -> String {
     encode(data, data.len() as u64 * 8)
 }
 
+/// Check if `data` is valid zbase32 encoded bytes
+pub fn validate(data: &[u8]) -> bool {
+    data.iter().all(|i| value_of_digit(*i).is_ok())
+}
+
+/// Check if `data` is valid zbase32 encoded string
+#[inline(always)]
+pub fn validate_str(data: &str) -> bool {
+    validate(data.as_bytes())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -209,6 +220,8 @@ mod tests {
                                                     0x35, 0xcf, 0x84, 0x65, 0x3a, 0x56, 0xd7, 0xc6,
                                                     0x75, 0xbe, 0x77, 0xdf])
     ];
+
+    const INVALID_TEST_DATA: &[&str] = &["ybndrfg8ejkmcpqxot1uwisza345H769", "bnℕe", "uv", "l"];
 
     #[test]
     fn test_decode() {
@@ -235,8 +248,7 @@ mod tests {
 
     #[test]
     fn test_decode_invalid_digits() {
-        let test_data = ["ybndrfg8ejkmcpqxot1uwisza345H769", "bnℕe", "uv", "l"];
-        for string in test_data.iter() {
+        for string in INVALID_TEST_DATA.iter() {
             assert!(decode(string.as_bytes(), string.as_bytes().len() as u64 * 8).is_err());
             assert!(decode_bytes(string.as_bytes()).is_err());
         }
@@ -264,6 +276,22 @@ mod tests {
     fn test_encode_bytes() {
         for &(_, zbase32, data) in TEST_DATA.iter().filter(|&&(i, _, _)| i % 8 == 0) {
             assert_eq!(encode_bytes(data), zbase32);
+        }
+    }
+
+    #[test]
+    fn test_validate() {
+        for &(_, zbase32, _) in TEST_DATA {
+            assert!(validate(zbase32.as_bytes()));
+            assert!(validate_str(zbase32));
+        }
+    }
+
+    #[test]
+    fn test_validate_invalid() {
+        for string in INVALID_TEST_DATA.iter() {
+            assert!(!validate(string.as_bytes()));
+            assert!(!validate_str(string));
         }
     }
 }

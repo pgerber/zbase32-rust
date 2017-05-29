@@ -32,6 +32,19 @@ quickcheck! {
     }
 }
 
+quickcheck! {
+    fn validate(data: ZBaseEncodedData) -> bool {
+        zbase32::validate(&data.as_slice())
+    }
+}
+
+quickcheck! {
+    fn validate_str(data: ZBaseEncodedData) -> bool {
+        let data = String::from_utf8(data.into_bytes()).unwrap();
+        zbase32::validate_str(&data)
+    }
+}
+
 #[derive(Clone, Debug)]
 struct ZBaseEncodedData(Vec<u8>);
 
@@ -46,5 +59,9 @@ impl Arbitrary for ZBaseEncodedData {
 impl ZBaseEncodedData {
     fn as_slice(&self) -> &[u8] {
         &self.0
+    }
+
+    fn into_bytes(self) -> Vec<u8> {
+        self.0
     }
 }
