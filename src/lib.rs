@@ -54,6 +54,8 @@ fn value_of_digit(digit: u8) -> Result<u8, &'static str> {
 ///
 /// Panics if `zbase32` decoded is shorter than N `bits`.
 ///
+/// # Examples
+///
 /// ```
 /// use zbase32;
 ///
@@ -99,6 +101,8 @@ pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
 ///
 /// Just like `decode` but doesn't allow decoding with bit precision.
 ///
+/// # Examples
+///
 /// ```
 /// use zbase32;
 ///
@@ -115,6 +119,8 @@ pub fn decode_full_bytes(zbase: &[u8]) -> Result<Vec<u8>, &'static str> {
 ///
 /// Panics if `zbase32` decoded is shorter than N `bits`.
 ///
+/// # Examples
+///
 /// ```
 /// use zbase32;
 ///
@@ -128,6 +134,8 @@ pub fn decode_str(zbase32: &str, bits: u64) -> Result<Vec<u8>, &'static str> {
 /// Decode given zbase32 encoded string
 ///
 /// Just like `decode_str` but doesn't allow decoding with bit precision.
+///
+/// # Examples
 ///
 /// ```
 /// use zbase32;
@@ -144,6 +152,8 @@ pub fn decode_full_bytes_str(zbase32: &str) -> Result<Vec<u8>, &'static str> {
 /// # Panics
 ///
 /// Panics if `data` is shorter than N `bits`.
+///
+/// # Examples
 ///
 /// ```
 /// use zbase32;
@@ -209,6 +219,8 @@ pub fn encode(data: &[u8], bits: u64) -> String {
 ///
 /// Just like `encode` but doesn't allow encoding with bit precision.
 ///
+/// # Examples
+///
 /// ```
 /// use zbase32;
 ///
@@ -223,6 +235,8 @@ pub fn encode_full_bytes(data: &[u8]) -> String {
 
 /// Check if `data` is valid zbase32 encoded bytes
 ///
+/// # Examples
+///
 /// ```
 /// use zbase32;
 ///
@@ -234,6 +248,8 @@ pub fn validate(data: &[u8]) -> bool {
 }
 
 /// Check if `data` is valid zbase32 encoded string
+///
+/// # Examples
 ///
 /// ```
 /// use zbase32;
