@@ -8,6 +8,7 @@
 
 const ALPHABET: &[u8; 32] = b"ybndrfg8ejkmcpqxot1uwisza345h769";
 
+#[inline]
 fn value_of_digit(digit: u8) -> Result<u8, &'static str> {
     match digit {
         b'y' => Ok(0x00),
@@ -46,6 +47,64 @@ fn value_of_digit(digit: u8) -> Result<u8, &'static str> {
     }
 }
 
+
+/// Decode first N `bits` of given zbase32 encoded data
+///
+/// ```
+/// use zbase32;
+///
+/// assert_eq!(zbase32::encode(&[0x80], 1), "o");
+/// ```
+pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
+    let capacity = if zbase32.len() % 8 == 0 {
+        zbase32.len() / 8
+    } else {
+        zbase32.len() / 8 + 1
+    };
+    let mut result = Vec::with_capacity(capacity);
+
+    let mut bits_remaining = bits;
+    let mut buffer_size: u8 = 0;
+    let mut buffer: u16 = !0;
+    for digit in zbase32 {
+        let value = value_of_digit(*digit)?;
+        buffer = (buffer << 5) | value as u16;
+        buffer_size += 5;
+        if bits_remaining < 8 {
+            buffer = buffer >> (buffer_size - bits_remaining as u8) <<
+                     (buffer_size - bits_remaining as u8);
+            println!("buffer: {:x}", buffer);
+            break;
+        }
+        if buffer_size >= 8 {
+            let byte = (buffer >> (buffer_size - 8)) as u8;
+            result.push(byte);
+            bits_remaining -= 8;
+            buffer_size -= 8;
+        }
+    }
+    if buffer_size > 0 && bits_remaining > 0 {
+        let byte = (buffer << (8 - buffer_size)) as u8;
+        result.push(byte);
+    }
+    // debug_assert_eq!(capacity, result.len());
+    Ok(result)
+}
+
+/// Decode given zbase32 encoded data
+///
+/// Just like `dencode` but doesn't allow encoding with bit precision.
+///
+/// ```
+/// use zbase32;
+///
+/// assert_eq!(zbase32::decode_bytes(b"qb1ze3m1").unwrap(), b"peter");
+/// ```
+#[inline]
+pub fn decode_bytes(zbase32: &[u8]) -> Result<Vec<u8>, &'static str> {
+    decode(zbase32, zbase32.len() as u64 * 8)
+}
+
 /// Encode first N `bits` with zbase32.
 ///
 /// # Panics
@@ -68,7 +127,7 @@ pub fn encode(data: &[u8], bits: u64) -> String {
     let mut result = Vec::with_capacity(capacity);
 
     let mut bits_remaining = bits;
-    let mut bit_offset = 0;
+    let mut bit_offset: u8 = 0;
     let mut remaining = data;
     let mut buffer = match data.len() {
         0 => 0xffff /* unused */,
@@ -137,9 +196,9 @@ mod tests {
         (0,   "",       &[]),
         (1,   "y",      &[0x00]),
         (1,   "o",      &[0x80]),
-        (1,   "o",      &[0xff, 0xff, 0xff]),
         (2,   "e",      &[0x40]),
         (2,   "a",      &[0xc0]),
+        (8,   "yy",     &[0x00]),
         (10,  "yy",     &[0x00, 0x00]),
         (10,  "on",     &[0x80, 0x80]),
         (20,  "tqre",   &[0x8b, 0x88, 0x80]),
@@ -152,10 +211,47 @@ mod tests {
     ];
 
     #[test]
+    fn test_decode() {
+        for &(bits, zbase32, data) in TEST_DATA {
+            assert_eq!(decode(zbase32.as_bytes(), bits).unwrap(), data);
+        }
+    }
+
+    #[test]
+    #[cfg_attr(rustfmt, rustfmt_skip)]
+    fn test_decode_bytes() {
+        let test_data: &[(&[u8], &[u8])] = &[
+            (b"6n9hq", &[0xf0, 0xbf, 0xc7, 0x00]),
+            (b"4t7ye", &[0xd4, 0x7a, 0x04, 0x00]),
+            (b"ybndrfg8ejkmcpqxot1uwisza345h769", &[0x00, 0x44, 0x32, 0x14, 0xc7, 0x42, 0x54, 0xb6,
+                                                    0x35, 0xcf, 0x84, 0x65, 0x3a, 0x56, 0xd7, 0xc6,
+                                                    0x75, 0xbe, 0x77, 0xdf])
+        ];
+
+        for &(zbase32, data) in test_data {
+            assert_eq!(decode_bytes(zbase32).unwrap(), data);
+        }
+    }
+
+    #[test]
+    fn test_decode_invalid_digits() {
+        let test_data = ["ybndrfg8ejkmcpqxot1uwisza345H769", "bnℕe", "uv", "l"];
+        for string in test_data.iter() {
+            assert!(decode(string.as_bytes(), string.as_bytes().len() as u64 * 8).is_err());
+            assert!(decode_bytes(string.as_bytes()).is_err());
+        }
+    }
+    #[test]
     fn test_encode() {
         for &(bits, zbase32, data) in TEST_DATA {
             assert_eq!(encode(data, bits), zbase32);
         }
+    }
+
+    #[test]
+    fn test_encode_superfluous_bits() {
+        assert_eq!(encode(&[0xff, 0xff], 1), "o");
+        assert_eq!(encode(&[0xd4, 0x7a, 0x04, 0xff], 24), "4t7ye");
     }
 
     #[test]
