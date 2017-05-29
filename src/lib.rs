@@ -70,7 +70,7 @@ pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
         let value = value_of_digit(*digit)?;
         buffer = (buffer << 5) | value as u16;
         buffer_size += 5;
-        if bits_remaining < 8 {
+        if bits_remaining < 8 && buffer_size as u64 >= bits_remaining {
             buffer = buffer >> (buffer_size - bits_remaining as u8) <<
                      (buffer_size - bits_remaining as u8);
             break;
@@ -83,7 +83,7 @@ pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
         }
     }
     if buffer_size > 0 && bits_remaining > 0 {
-        let byte = (buffer << (8 - buffer_size)) as u8;
+        let byte = (buffer << 8u8.saturating_sub(buffer_size)) as u8;
         result.push(byte);
     }
     debug_assert_eq!(capacity, result.len());

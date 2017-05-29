@@ -1,8 +1,10 @@
 #[macro_use]
 extern crate quickcheck;
+extern crate rand;
 extern crate zbase32;
 
 use quickcheck::{Arbitrary, Gen};
+use rand::Rng;
 
 quickcheck! {
     fn test_recode(data: Vec<u8>) -> bool {
@@ -23,6 +25,25 @@ quickcheck! {
         }
 
         data == decoded
+    }
+}
+
+quickcheck! {
+    fn encode_too_long(data: Vec<u8>) -> bool {
+        let len_bits = (data.len() as u64) * 8;
+        let rand_bits = if len_bits > 0 { rand::thread_rng().gen_range(0, len_bits) } else { 0 };
+        println!("datalength: {} bits, encoded length: {} bits", len_bits, rand_bits);
+        zbase32::encode(&data, rand_bits);
+        true
+    }
+}
+
+quickcheck! {
+    fn decode_partial(data: ZBaseEncodedData) -> bool {
+        let len_bits = (data.as_slice().len() as u64) * 5;
+        let rand_bits = rand::thread_rng().gen_range(0, len_bits);
+        println!("data length: {} bits, encoded length: {} bits", len_bits, rand_bits);
+        zbase32::decode(&data.as_slice(), rand_bits).is_ok()
     }
 }
 
@@ -50,7 +71,7 @@ struct ZBaseEncodedData(Vec<u8>);
 
 impl Arbitrary for ZBaseEncodedData {
     fn arbitrary<G: Gen>(g: &mut G) -> Self {
-        let len = g.gen_range(0, 256);
+        let len = g.gen_range(1, 256);
         let content = (0..len).map(|_| *g.choose(zbase32::ALPHABET).unwrap()).collect();
         ZBaseEncodedData(content)
     }
