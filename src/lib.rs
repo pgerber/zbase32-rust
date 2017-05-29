@@ -50,12 +50,17 @@ fn value_of_digit(digit: u8) -> Result<u8, &'static str> {
 
 /// Decode first N `bits` of given zbase32 encoded data
 ///
+/// # Panic
+///
+/// Panics if `zbase32` decoded is shorter than N `bits`.
+///
 /// ```
 /// use zbase32;
 ///
 /// assert_eq!(zbase32::decode(b"o", 1).unwrap(), &[0x80]);
 /// ```
 pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
+    assert!(zbase32.len() as u64 * 5 >= bits, "zbase64 slice too short");
     let capacity = if bits % 8 == 0 {
         bits / 8
     } else {
@@ -106,14 +111,18 @@ pub fn decode_full_bytes(zbase: &[u8]) -> Result<Vec<u8>, &'static str> {
 
 /// Decode first N `bits` of given zbase32 encoded string
 ///
+/// # Panic
+///
+/// Panics if `zbase32` decoded is shorter than N `bits`.
+///
 /// ```
 /// use zbase32;
 ///
 /// assert_eq!(zbase32::decode_str("o", 1).unwrap(), &[0x80]);
 /// ```
 #[inline]
-pub fn decode_str(zbase: &str, bits: u64) -> Result<Vec<u8>, &'static str> {
-    decode(zbase.as_bytes(), bits)
+pub fn decode_str(zbase32: &str, bits: u64) -> Result<Vec<u8>, &'static str> {
+    decode(zbase32.as_bytes(), bits)
 }
 
 /// Decode given zbase32 encoded string
@@ -288,10 +297,17 @@ mod tests {
     #[test]
     fn test_decode_invalid_digits() {
         for string in INVALID_TEST_DATA.iter() {
-            assert!(decode(string.as_bytes(), string.as_bytes().len() as u64 * 8).is_err());
+            assert!(decode(string.as_bytes(), string.as_bytes().len() as u64 * 5).is_err());
             assert!(decode_full_bytes(string.as_bytes()).is_err());
         }
     }
+
+    #[test]
+    #[should_panic(expected = "zbase64 slice too short")]
+    fn test_decode_short_slice() {
+        decode(b"oyoy", 4 * 5 + 1).unwrap();
+    }
+
     #[test]
     fn test_encode() {
         for &(bits, zbase32, data) in TEST_DATA {
