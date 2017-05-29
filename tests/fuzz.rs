@@ -7,11 +7,11 @@ use quickcheck::{Arbitrary, Gen};
 quickcheck! {
     fn test_recode(data: Vec<u8>) -> bool {
         let encoded = zbase32::encode(&data, data.len() as u64 * 8);
-        let encoded_bytes = zbase32::encode_bytes(&data);
+        let encoded_bytes = zbase32::encode_full_bytes(&data);
         assert_eq!(encoded, encoded_bytes);
 
         let decoded = zbase32::decode(&encoded.as_bytes(), data.len() as u64 * 8).unwrap();
-        let decoded_bytes = zbase32::decode_bytes(&encoded.as_bytes()).unwrap();
+        let decoded_bytes = zbase32::decode_full_bytes(&encoded.as_bytes()).unwrap();
         assert_eq!(decoded[..], decoded_bytes[..data.len()]);
 
         // `decoded_bytes` may add an additional byte since it doesn't know the original size.
@@ -28,7 +28,7 @@ quickcheck! {
 
 quickcheck! {
     fn decode(data: ZBaseEncodedData) -> bool {
-        zbase32::decode_bytes(&data.as_slice()).is_ok()
+        zbase32::decode_full_bytes(&data.as_slice()).is_ok()
     }
 }
 

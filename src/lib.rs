@@ -48,13 +48,12 @@ fn value_of_digit(digit: u8) -> Result<u8, &'static str> {
     }
 }
 
-
 /// Decode first N `bits` of given zbase32 encoded data
 ///
 /// ```
 /// use zbase32;
 ///
-/// assert_eq!(zbase32::encode(&[0x80], 1), "o");
+/// assert_eq!(zbase32::decode(b"o", 1).unwrap(), &[0x80]);
 /// ```
 pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
     let capacity = if bits % 8 == 0 {
@@ -91,18 +90,44 @@ pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
     Ok(result)
 }
 
-/// Decode given zbase32 encoded data
+/// Decode given zbase32 encoded string
 ///
-/// Just like `dencode` but doesn't allow encoding with bit precision.
+/// Just like `decode` but doesn't allow decoding with bit precision.
 ///
 /// ```
 /// use zbase32;
 ///
-/// assert_eq!(zbase32::decode_bytes(b"qb1ze3m1").unwrap(), b"peter");
+/// assert_eq!(zbase32::decode_full_bytes(b"qb1ze3m1").unwrap(), b"peter");
 /// ```
 #[inline]
-pub fn decode_bytes(zbase32: &[u8]) -> Result<Vec<u8>, &'static str> {
-    decode(zbase32, zbase32.len() as u64 * 5)
+pub fn decode_full_bytes(zbase: &[u8]) -> Result<Vec<u8>, &'static str> {
+    decode(zbase, zbase.len() as u64 * 5)
+}
+
+/// Decode first N `bits` of given zbase32 encoded string
+///
+/// ```
+/// use zbase32;
+///
+/// assert_eq!(zbase32::decode_str("o", 1).unwrap(), &[0x80]);
+/// ```
+#[inline]
+pub fn decode_str(zbase: &str, bits: u64) -> Result<Vec<u8>, &'static str> {
+    decode(zbase.as_bytes(), bits)
+}
+
+/// Decode given zbase32 encoded string
+///
+/// Just like `decode_str` but doesn't allow decoding with bit precision.
+///
+/// ```
+/// use zbase32;
+///
+/// assert_eq!(zbase32::decode_full_bytes_str("qb1ze3m1").unwrap(), b"peter");
+/// ```
+#[inline]
+pub fn decode_full_bytes_str(zbase32: &str) -> Result<Vec<u8>, &'static str> {
+    decode_full_bytes(zbase32.as_bytes())
 }
 
 /// Encode first N `bits` with zbase32.
@@ -179,11 +204,11 @@ pub fn encode(data: &[u8], bits: u64) -> String {
 /// use zbase32;
 ///
 /// let data = "Just an arbitrary sentence.";
-/// assert_eq!(zbase32::encode_bytes(data.as_bytes()),
+/// assert_eq!(zbase32::encode_full_bytes(data.as_bytes()),
 ///            "jj4zg7bycfznyam1cjwzehubqjh1yh5fp34gk5udcwzy");
 /// ```
 #[inline]
-pub fn encode_bytes(data: &[u8]) -> String {
+pub fn encode_full_bytes(data: &[u8]) -> String {
     encode(data, data.len() as u64 * 8)
 }
 
@@ -246,7 +271,7 @@ mod tests {
 
     #[test]
     #[cfg_attr(rustfmt, rustfmt_skip)]
-    fn test_decode_bytes() {
+    fn test_decode_full_bytes() {
         let test_data: &[(&[u8], &[u8])] = &[
             (b"6n9hq", &[0xf0, 0xbf, 0xc7, 0x00]),
             (b"4t7ye", &[0xd4, 0x7a, 0x04, 0x00]),
@@ -256,7 +281,7 @@ mod tests {
         ];
 
         for &(zbase32, data) in test_data {
-            assert_eq!(decode_bytes(zbase32).unwrap(), data);
+            assert_eq!(decode_full_bytes(zbase32).unwrap(), data);
         }
     }
 
@@ -264,7 +289,7 @@ mod tests {
     fn test_decode_invalid_digits() {
         for string in INVALID_TEST_DATA.iter() {
             assert!(decode(string.as_bytes(), string.as_bytes().len() as u64 * 8).is_err());
-            assert!(decode_bytes(string.as_bytes()).is_err());
+            assert!(decode_full_bytes(string.as_bytes()).is_err());
         }
     }
     #[test]
@@ -287,9 +312,9 @@ mod tests {
     }
 
     #[test]
-    fn test_encode_bytes() {
+    fn test_encode_full_bytes() {
         for &(_, zbase32, data) in TEST_DATA.iter().filter(|&&(i, _, _)| i % 8 == 0) {
-            assert_eq!(encode_bytes(data), zbase32);
+            assert_eq!(encode_full_bytes(data), zbase32);
         }
     }
 
