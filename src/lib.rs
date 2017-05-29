@@ -56,11 +56,11 @@ fn value_of_digit(digit: u8) -> Result<u8, &'static str> {
 /// assert_eq!(zbase32::encode(&[0x80], 1), "o");
 /// ```
 pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
-    let capacity = if zbase32.len() % 8 == 0 {
-        zbase32.len() / 8
+    let capacity = if bits % 8 == 0 {
+        bits / 8
     } else {
-        zbase32.len() / 8 + 1
-    };
+        bits / 8 + 1
+    } as usize;
     let mut result = Vec::with_capacity(capacity);
 
     let mut bits_remaining = bits;
@@ -86,7 +86,7 @@ pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
         let byte = (buffer << (8 - buffer_size)) as u8;
         result.push(byte);
     }
-    // debug_assert_eq!(capacity, result.len());
+    debug_assert_eq!(capacity, result.len());
     Ok(result)
 }
 
@@ -101,7 +101,7 @@ pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
 /// ```
 #[inline]
 pub fn decode_bytes(zbase32: &[u8]) -> Result<Vec<u8>, &'static str> {
-    decode(zbase32, zbase32.len() as u64 * 8)
+    decode(zbase32, zbase32.len() as u64 * 5)
 }
 
 /// Encode first N `bits` with zbase32.
