@@ -68,9 +68,17 @@ pub fn encode(data: &[u8], bits: u64) -> String {
     let mut result = Vec::with_capacity(capacity);
 
     let mut bits_remaining = bits;
-    let mut remaining = if data.len() > 2 { &data[2..] } else { &[] };
     let mut bit_offset = 0;
-    let mut buffer = (*data.get(0).unwrap_or(&0) as u16) << 8 | *data.get(1).unwrap_or(&0) as u16;
+    let mut remaining = data;
+    let mut buffer = match data.len() {
+        0 => 0xffff /* unused */,
+        1 => (data[0] as u16) << 8,
+        _ => {
+            remaining = &data[2..];
+            (data[0] as u16) << 8 | data[1] as u16
+        }
+    };
+
     while bits_remaining > 0 {
         let index = {
             let mask = if bits_remaining >= 5 {
