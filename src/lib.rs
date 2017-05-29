@@ -73,7 +73,6 @@ pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
         if bits_remaining < 8 {
             buffer = buffer >> (buffer_size - bits_remaining as u8) <<
                      (buffer_size - bits_remaining as u8);
-            println!("buffer: {:x}", buffer);
             break;
         }
         if buffer_size >= 8 {
