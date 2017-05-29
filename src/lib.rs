@@ -188,11 +188,25 @@ pub fn encode_bytes(data: &[u8]) -> String {
 }
 
 /// Check if `data` is valid zbase32 encoded bytes
+///
+/// ```
+/// use zbase32;
+///
+/// assert!(zbase32::validate(b"y1"));
+/// assert!(!zbase32::validate(b"A"));
+/// ```
 pub fn validate(data: &[u8]) -> bool {
     data.iter().all(|i| value_of_digit(*i).is_ok())
 }
 
 /// Check if `data` is valid zbase32 encoded string
+///
+/// ```
+/// use zbase32;
+///
+/// assert!(zbase32::validate_str("y1"));
+/// assert!(!zbase32::validate_str("A"));
+/// ```
 #[inline(always)]
 pub fn validate_str(data: &str) -> bool {
     validate(data.as_bytes())
