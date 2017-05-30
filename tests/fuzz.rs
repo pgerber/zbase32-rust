@@ -32,7 +32,7 @@ quickcheck! {
     fn encode_too_long(data: Vec<u8>) -> bool {
         let len_bits = (data.len() as u64) * 8;
         let rand_bits = if len_bits > 0 { rand::thread_rng().gen_range(0, len_bits) } else { 0 };
-        println!("datalength: {} bits, encoded length: {} bits", len_bits, rand_bits);
+        println!("data length: {} bits, requested length: {} bits", len_bits, rand_bits);
         zbase32::encode(&data, rand_bits);
         true
     }
@@ -42,8 +42,11 @@ quickcheck! {
     fn decode_partial(data: ZBaseEncodedData) -> bool {
         let len_bits = (data.as_slice().len() as u64) * 5;
         let rand_bits = rand::thread_rng().gen_range(0, len_bits);
-        println!("data length: {} bits, encoded length: {} bits", len_bits, rand_bits);
-        zbase32::decode(&data.as_slice(), rand_bits).is_ok()
+        println!("data length: {} bits, requested length: {} bits", len_bits, rand_bits);
+        let decoded1 = zbase32::decode(&data.as_slice(), rand_bits).unwrap();
+        let encoded = zbase32::encode(&decoded1, rand_bits);
+        let decoded2 = zbase32::decode_str(&encoded, rand_bits).unwrap();
+        decoded1 == decoded2
     }
 }
 

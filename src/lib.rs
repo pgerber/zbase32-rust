@@ -6,6 +6,8 @@
 #![cfg_attr(feature="clippy", feature(plugin))]
 #![cfg_attr(feature="clippy", plugin(clippy))]
 
+#![cfg_attr(feature="clippy", allow(inline_always))]
+
 /// Alphabet used by zbase32
 pub const ALPHABET: &[u8; 32] = b"ybndrfg8ejkmcpqxot1uwisza345h769";
 
@@ -78,8 +80,6 @@ pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
         buffer = (buffer << 5) | value as u16;
         buffer_size += 5;
         if bits_remaining < 8 && buffer_size as u64 >= bits_remaining {
-            buffer = buffer >> (buffer_size - bits_remaining as u8) <<
-                     (buffer_size - bits_remaining as u8);
             break;
         }
         if buffer_size >= 8 {
@@ -89,8 +89,11 @@ pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
             buffer_size -= 8;
         }
     }
-    if buffer_size > 0 && bits_remaining > 0 {
-        let byte = (buffer << 8_u8.saturating_sub(buffer_size)) as u8;
+    if bits_remaining > 0 {
+        let trim_right = buffer_size - bits_remaining as u8;
+        buffer >>= trim_right;
+        buffer_size -= trim_right;
+        let byte = (buffer << (8_u8 - buffer_size)) as u8;
         result.push(byte);
     }
     debug_assert_eq!(capacity, result.len());
@@ -323,6 +326,7 @@ mod tests {
         assert_eq!(decode(b"999", 1).unwrap(), &[0x80]);
         assert_eq!(decode(b"4t7yj", 24).unwrap(), &[0xd4, 0x7a, 0x04]);
         assert_eq!(decode(b"4t7ye9", 25).unwrap(), &[0xd4, 0x7a, 0x04, 0x00]);
+        assert_eq!(decode(b"gyh3", 18).unwrap(), &[0x30, 0x39, 0x80]);
     }
 
     #[test]
