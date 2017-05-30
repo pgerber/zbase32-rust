@@ -5,6 +5,7 @@
 
 #![cfg_attr(feature="clippy", feature(plugin))]
 #![cfg_attr(feature="clippy", plugin(clippy))]
+#![cfg_attr(all(test, feature = "unstable"), feature(test))]
 
 #![cfg_attr(feature="clippy", allow(inline_always))]
 
@@ -260,7 +261,13 @@ pub fn validate_str(data: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(feature = "unstable")]
+    extern crate test;
+    extern crate rand;
+
     use super::*;
+    #[cfg(feature = "unstable")]
+    use tests::rand::Rng;
 
     #[cfg_attr(rustfmt, rustfmt_skip)]
     const TEST_DATA: &[(u64, &str, &[u8])] = &[
@@ -282,6 +289,9 @@ mod tests {
     ];
 
     const INVALID_TEST_DATA: &[&str] = &["ybndrfg8ejkmcpqxot1uwisza345H769", "bnℕe", "uv", "l"];
+
+    #[cfg(feature = "unstable")]
+    const ONE_MIB_IN_BITS: usize = 8388608;
 
     #[test]
     fn test_decode() {
@@ -368,5 +378,33 @@ mod tests {
             assert!(!validate(string.as_bytes()));
             assert!(!validate_str(string));
         }
+    }
+
+    #[cfg(feature = "unstable")]
+    #[bench]
+    fn decode_one_mib(b: &mut test::Bencher) {
+        let data: Vec<_> = (0..ONE_MIB_IN_BITS/5).map(|_| *rand::thread_rng().choose(ALPHABET).unwrap()).collect();
+        b.iter(|| decode_full_bytes(&data).unwrap())
+    }
+
+    #[cfg(feature = "unstable")]
+    #[bench]
+    fn encode_one_mib(b: &mut test::Bencher) {
+        let data: Vec<_> = rand::thread_rng().gen_iter().take(ONE_MIB_IN_BITS/8).collect();
+        b.iter(|| encode_full_bytes(&data))
+    }
+
+    #[cfg(feature = "unstable")]
+    #[bench]
+    fn decode_40_bytes(b: &mut test::Bencher) {
+        let data: Vec<_> = (0..40/5).map(|_| *rand::thread_rng().choose(ALPHABET).unwrap()).collect();
+        b.iter(|| decode_full_bytes(&data).unwrap())
+    }
+
+    #[cfg(feature = "unstable")]
+    #[bench]
+    fn encode_40_bytes(b: &mut test::Bencher) {
+        let data: Vec<_> = rand::thread_rng().gen_iter().take(40/8).collect();
+        b.iter(|| encode_full_bytes(&data))
     }
 }
