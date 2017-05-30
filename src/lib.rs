@@ -186,19 +186,12 @@ pub fn encode(data: &[u8], bits: u64) -> String {
     };
 
     while bits_remaining > 0 {
-        let index = {
-            let mask = if bits_remaining >= 5 {
-                0x1f
-            } else {
-                // trim superfluous bits at end of `data`
-                0x1f >> (5 - bits_remaining) << (5 - bits_remaining)
-            };
-            (buffer >> (16 - 5 - bit_offset)) & mask
-        };
+        let unused_bits = 5_u64.saturating_sub(bits_remaining);
+        let index = (buffer >> (16 - 5 - bit_offset + unused_bits as u8) << unused_bits) & 0x1f;
         result.push(ALPHABET[index as usize]);
 
         bit_offset += 5;
-        bits_remaining = bits_remaining.saturating_sub(5);
+        bits_remaining -= 5 - unused_bits;
 
         if bit_offset >= 8 {
             match remaining.split_first() {
