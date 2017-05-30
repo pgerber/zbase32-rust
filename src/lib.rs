@@ -90,7 +90,7 @@ pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
         }
     }
     if buffer_size > 0 && bits_remaining > 0 {
-        let byte = (buffer << 8u8.saturating_sub(buffer_size)) as u8;
+        let byte = (buffer << 8_u8.saturating_sub(buffer_size)) as u8;
         result.push(byte);
     }
     debug_assert_eq!(capacity, result.len());
@@ -316,6 +316,13 @@ mod tests {
             assert!(decode(string.as_bytes(), string.as_bytes().len() as u64 * 5).is_err());
             assert!(decode_full_bytes(string.as_bytes()).is_err());
         }
+    }
+
+    #[test]
+    fn test_decode_superfluous_bits() {
+        assert_eq!(decode(b"999", 1).unwrap(), &[0x80]);
+        assert_eq!(decode(b"4t7yj", 24).unwrap(), &[0xd4, 0x7a, 0x04]);
+        assert_eq!(decode(b"4t7ye9", 25).unwrap(), &[0xd4, 0x7a, 0x04, 0x00]);
     }
 
     #[test]
