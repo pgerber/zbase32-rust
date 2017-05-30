@@ -177,7 +177,7 @@ pub fn encode(data: &[u8], bits: u64) -> String {
     let mut bit_offset: u8 = 0;
     let mut remaining = data;
     let mut buffer = match data.len() {
-        0 => 0xffff /* unused */,
+        0 => !0 /* unused */,
         1 => (data[0] as u16) << 8,
         _ => {
             remaining = &data[2..];

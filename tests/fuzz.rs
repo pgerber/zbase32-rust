@@ -29,6 +29,16 @@ quickcheck! {
 }
 
 quickcheck! {
+    fn try_decode(data: Vec<u8>) -> bool {
+        if zbase32::validate(&data) {
+            zbase32::decode_full_bytes(&data).is_ok()
+        } else {
+            zbase32::decode_full_bytes(&data).is_err()
+        }
+    }
+}
+
+quickcheck! {
     fn encode_too_long(data: Vec<u8>) -> bool {
         let len_bits = (data.len() as u64) * 8;
         let rand_bits = if len_bits > 0 { rand::thread_rng().gen_range(0, len_bits) } else { 0 };
@@ -39,11 +49,11 @@ quickcheck! {
 }
 
 quickcheck! {
-    fn decode_partial(data: ZBaseEncodedData) -> bool {
-        let len_bits = (data.as_slice().len() as u64) * 5;
+    fn recode_partial(data: ZBaseEncodedData) -> bool {
+        let len_bits = (data.as_bytes().len() as u64) * 5;
         let rand_bits = rand::thread_rng().gen_range(0, len_bits);
         println!("data length: {} bits, requested length: {} bits", len_bits, rand_bits);
-        let decoded1 = zbase32::decode(&data.as_slice(), rand_bits).unwrap();
+        let decoded1 = zbase32::decode(&data.as_bytes(), rand_bits).unwrap();
         let encoded = zbase32::encode(&decoded1, rand_bits);
         let decoded2 = zbase32::decode_str(&encoded, rand_bits).unwrap();
         decoded1 == decoded2
@@ -52,13 +62,13 @@ quickcheck! {
 
 quickcheck! {
     fn decode(data: ZBaseEncodedData) -> bool {
-        zbase32::decode_full_bytes(&data.as_slice()).is_ok()
+        zbase32::decode_full_bytes(&data.as_bytes()).is_ok()
     }
 }
 
 quickcheck! {
     fn validate(data: ZBaseEncodedData) -> bool {
-        zbase32::validate(&data.as_slice())
+        zbase32::validate(&data.as_bytes())
     }
 }
 
@@ -81,7 +91,7 @@ impl Arbitrary for ZBaseEncodedData {
 }
 
 impl ZBaseEncodedData {
-    fn as_slice(&self) -> &[u8] {
+    fn as_bytes(&self) -> &[u8] {
         &self.0
     }
 
