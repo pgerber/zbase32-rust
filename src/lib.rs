@@ -396,14 +396,14 @@ mod tests {
 
     #[cfg(feature = "unstable")]
     #[bench]
-    fn decode_40_bytes(b: &mut test::Bencher) {
+    fn decode_five_bytes(b: &mut test::Bencher) {
         let data: Vec<_> = (0..40/5).map(|_| *rand::thread_rng().choose(ALPHABET).unwrap()).collect();
         b.iter(|| decode_full_bytes(&data).unwrap())
     }
 
     #[cfg(feature = "unstable")]
     #[bench]
-    fn encode_40_bytes(b: &mut test::Bencher) {
+    fn encode_five_bytes(b: &mut test::Bencher) {
         let data: Vec<_> = rand::thread_rng().gen_iter().take(40/8).collect();
         b.iter(|| encode_full_bytes(&data))
     }
