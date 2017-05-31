@@ -291,7 +291,7 @@ mod tests {
     const INVALID_TEST_DATA: &[&str] = &["ybndrfg8ejkmcpqxot1uwisza345H769", "bnℕe", "uv", "l"];
 
     #[cfg(feature = "unstable")]
-    const ONE_MIB_IN_BITS: usize = 8388608;
+    const ONE_MIB: usize = 1048576;
 
     #[test]
     fn test_decode() {
@@ -383,28 +383,46 @@ mod tests {
     #[cfg(feature = "unstable")]
     #[bench]
     fn decode_one_mib(b: &mut test::Bencher) {
-        let data: Vec<_> = (0..ONE_MIB_IN_BITS/5).map(|_| *rand::thread_rng().choose(ALPHABET).unwrap()).collect();
+        let data = random_encoded_data(ONE_MIB);
         b.iter(|| decode_full_bytes(&data).unwrap())
     }
 
     #[cfg(feature = "unstable")]
     #[bench]
     fn encode_one_mib(b: &mut test::Bencher) {
-        let data: Vec<_> = rand::thread_rng().gen_iter().take(ONE_MIB_IN_BITS/8).collect();
+        let data = random_data(ONE_MIB);
         b.iter(|| encode_full_bytes(&data))
     }
 
     #[cfg(feature = "unstable")]
     #[bench]
     fn decode_five_bytes(b: &mut test::Bencher) {
-        let data: Vec<_> = (0..40/5).map(|_| *rand::thread_rng().choose(ALPHABET).unwrap()).collect();
+        let data = random_encoded_data(5);
         b.iter(|| decode_full_bytes(&data).unwrap())
     }
 
     #[cfg(feature = "unstable")]
     #[bench]
     fn encode_five_bytes(b: &mut test::Bencher) {
-        let data: Vec<_> = rand::thread_rng().gen_iter().take(40/8).collect();
+        let data = random_data(5);
         b.iter(|| encode_full_bytes(&data))
+    }
+
+    #[cfg(feature = "unstable")]
+    #[bench]
+    fn validate_one_mib(b: &mut test::Bencher) {
+        let data = random_encoded_data(ONE_MIB);
+        b.iter(|| validate(&data))
+    }
+
+    #[cfg(feature = "unstable")]
+    fn random_data(bytes: usize) -> Vec<u8> {
+        rand::thread_rng().gen_iter().take(bytes).collect()
+    }
+
+    #[cfg(feature = "unstable")]
+    fn random_encoded_data(bytes: usize) -> Vec<u8> {
+        let mut gen = rand::thread_rng();
+        (0..bytes*8/5).map(|_| *gen.choose(ALPHABET).unwrap()).collect()
     }
 }
