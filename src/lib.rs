@@ -8,6 +8,28 @@
 #![cfg_attr(all(test, feature = "unstable"), feature(test))]
 
 #![cfg_attr(feature="clippy", allow(inline_always))]
+#![cfg_attr(feature = "clippy", warn(cast_possible_wrap))]
+#![cfg_attr(feature = "clippy", warn(cast_precision_loss))]
+#![cfg_attr(feature = "clippy", warn(cast_sign_loss))]
+#![cfg_attr(feature = "clippy", warn(empty_enum))]
+#![cfg_attr(feature = "clippy", warn(enum_glob_use))]
+#![cfg_attr(feature = "clippy", warn(float_arithmetic))]
+#![cfg_attr(feature = "clippy", warn(items_after_statements))]
+#![cfg_attr(feature = "clippy", warn(if_not_else))]
+#![cfg_attr(feature = "clippy", deny(mem_forget))]
+#![cfg_attr(feature = "clippy", warn(mut_mut))]
+#![cfg_attr(feature = "clippy", warn(nonminimal_bool))]
+#![cfg_attr(feature = "clippy", warn(option_map_unwrap_or))]
+#![cfg_attr(feature = "clippy", warn(option_map_unwrap_or_else))]
+#![cfg_attr(feature = "clippy", warn(option_unwrap_used))]
+#![cfg_attr(feature = "clippy", warn(print_stdout))]
+#![cfg_attr(feature = "clippy", warn(result_unwrap_used))]
+#![cfg_attr(feature = "clippy", deny(unicode_not_nfc))]
+#![cfg_attr(feature = "clippy", deny(unseparated_literal_suffix))]
+#![cfg_attr(feature = "clippy", deny(used_underscore_binding))]
+#![cfg_attr(feature = "clippy", deny(wrong_pub_self_convention))]
+#![cfg_attr(feature = "clippy", deny(wrong_self_convention))]
+
 
 /// Alphabet used by zbase32
 pub const ALPHABET: &[u8; 32] = b"ybndrfg8ejkmcpqxot1uwisza345h769";
