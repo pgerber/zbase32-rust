@@ -34,42 +34,59 @@
 /// Alphabet used by zbase32
 pub const ALPHABET: &[u8; 32] = b"ybndrfg8ejkmcpqxot1uwisza345h769";
 
+enum ZType {
+    Digit(u8),
+    Whitespace,
+    Err(&'static str),
+}
+
+impl ZType {
+    fn is_valid(&self) -> bool {
+        if let ZType::Err(_) = *self {
+            false
+        } else {
+            true
+        }
+    }
+}
+
 #[inline]
-fn value_of_digit(digit: u8) -> Result<u8, &'static str> {
+fn value_of_digit(digit: u8) -> ZType {
     match digit {
-        b'y' => Ok(0x00),
-        b'b' => Ok(0x01),
-        b'n' => Ok(0x02),
-        b'd' => Ok(0x03),
-        b'r' => Ok(0x04),
-        b'f' => Ok(0x05),
-        b'g' => Ok(0x06),
-        b'8' => Ok(0x07),
-        b'e' => Ok(0x08),
-        b'j' => Ok(0x09),
-        b'k' => Ok(0x0a),
-        b'm' => Ok(0x0b),
-        b'c' => Ok(0x0c),
-        b'p' => Ok(0x0d),
-        b'q' => Ok(0x0e),
-        b'x' => Ok(0x0f),
-        b'o' => Ok(0x10),
-        b't' => Ok(0x11),
-        b'1' => Ok(0x12),
-        b'u' => Ok(0x13),
-        b'w' => Ok(0x14),
-        b'i' => Ok(0x15),
-        b's' => Ok(0x16),
-        b'z' => Ok(0x17),
-        b'a' => Ok(0x18),
-        b'3' => Ok(0x19),
-        b'4' => Ok(0x1a),
-        b'5' => Ok(0x1b),
-        b'h' => Ok(0x1c),
-        b'7' => Ok(0x1d),
-        b'6' => Ok(0x1e),
-        b'9' => Ok(0x1f),
-        _ => Err("not a zbase32 digit"),
+        b'y' => ZType::Digit(0x00),
+        b'b' => ZType::Digit(0x01),
+        b'n' => ZType::Digit(0x02),
+        b'd' => ZType::Digit(0x03),
+        b'r' => ZType::Digit(0x04),
+        b'f' => ZType::Digit(0x05),
+        b'g' => ZType::Digit(0x06),
+        b'8' => ZType::Digit(0x07),
+        b'e' => ZType::Digit(0x08),
+        b'j' => ZType::Digit(0x09),
+        b'k' => ZType::Digit(0x0a),
+        b'm' => ZType::Digit(0x0b),
+        b'c' => ZType::Digit(0x0c),
+        b'p' => ZType::Digit(0x0d),
+        b'q' => ZType::Digit(0x0e),
+        b'x' => ZType::Digit(0x0f),
+        b'o' => ZType::Digit(0x10),
+        b't' => ZType::Digit(0x11),
+        b'1' => ZType::Digit(0x12),
+        b'u' => ZType::Digit(0x13),
+        b'w' => ZType::Digit(0x14),
+        b'i' => ZType::Digit(0x15),
+        b's' => ZType::Digit(0x16),
+        b'z' => ZType::Digit(0x17),
+        b'a' => ZType::Digit(0x18),
+        b'3' => ZType::Digit(0x19),
+        b'4' => ZType::Digit(0x1a),
+        b'5' => ZType::Digit(0x1b),
+        b'h' => ZType::Digit(0x1c),
+        b'7' => ZType::Digit(0x1d),
+        b'6' => ZType::Digit(0x1e),
+        b'9' => ZType::Digit(0x1f),
+        b' ' | b'\t' | b'\n' => ZType::Whitespace,
+        _ => ZType::Err("not a zbase32 digit"),
     }
 }
 
@@ -86,40 +103,58 @@ fn value_of_digit(digit: u8) -> Result<u8, &'static str> {
 ///
 /// assert_eq!(zbase32::decode(b"o", 1).unwrap(), &[0x80]);
 /// ```
+#[inline]
 pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
-    assert!(zbase32.len() as u64 * 5 >= bits, "zbase64 slice too short");
-    let capacity = if bits % 8 == 0 {
-        bits / 8
-    } else {
-        bits / 8 + 1
-    } as usize;
+    decode_internal(zbase32, Some(bits))
+}
+
+fn decode_internal(zbase32: &[u8], bits: Option<u64>) -> Result<Vec<u8>, &'static str> {
+    let capacity = bits.map_or(0, |bits| {
+        if bits % 8 == 0 {
+            bits / 8
+        } else {
+            bits / 8 + 1
+        }
+    }) as usize;
     let mut result = Vec::with_capacity(capacity);
 
     let mut bits_remaining = bits;
     let mut buffer_size: u8 = 0;
     let mut buffer: u16 = !0;
     for digit in zbase32 {
-        let value = value_of_digit(*digit)?;
+        let value = match value_of_digit(*digit) {
+            ZType::Digit(digit) => digit,
+            ZType::Whitespace => continue,
+            ZType::Err(e) => return Err(e),
+        };
         buffer = (buffer << 5) | value as u16;
         buffer_size += 5;
-        if bits_remaining < 8 && buffer_size as u64 >= bits_remaining {
-            break;
+        if let Some(bits_remaining) = bits_remaining {
+            if bits_remaining < 8 && buffer_size as u64 >= bits_remaining {
+                break;
+            }
         }
         if buffer_size >= 8 {
             let byte = (buffer >> (buffer_size - 8)) as u8;
             result.push(byte);
-            bits_remaining -= 8;
+            if let Some(mut r) = bits_remaining.as_mut() {
+                *r -= 8;
+            };
             buffer_size -= 8;
         }
     }
-    if bits_remaining > 0 {
-        let trim_right = buffer_size - bits_remaining as u8;
+    let remaining = bits_remaining.unwrap_or(buffer_size as u64);
+    assert!(remaining <= buffer_size as u64, "zbase64 slice too short");
+    if remaining > 0 {
+        let trim_right = buffer_size - remaining as u8;
         buffer >>= trim_right;
         buffer_size -= trim_right;
         let byte = (buffer << (8_u8 - buffer_size)) as u8;
         result.push(byte);
     }
-    debug_assert_eq!(capacity, result.len());
+    if let Some(_) = bits {
+        debug_assert_eq!(capacity, result.len())
+    };
     Ok(result)
 }
 
@@ -136,7 +171,7 @@ pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
 /// ```
 #[inline]
 pub fn decode_full_bytes(zbase: &[u8]) -> Result<Vec<u8>, &'static str> {
-    decode(zbase, zbase.len() as u64 * 5)
+    decode_internal(zbase, None)
 }
 
 /// Decode first N `bits` of given zbase32 encoded string
@@ -154,7 +189,7 @@ pub fn decode_full_bytes(zbase: &[u8]) -> Result<Vec<u8>, &'static str> {
 /// ```
 #[inline]
 pub fn decode_str(zbase32: &str, bits: u64) -> Result<Vec<u8>, &'static str> {
-    decode(zbase32.as_bytes(), bits)
+    decode_internal(zbase32.as_bytes(), Some(bits))
 }
 
 /// Decode given zbase32 encoded string
@@ -263,7 +298,7 @@ pub fn encode_full_bytes(data: &[u8]) -> String {
 /// assert!(!zbase32::validate(b"A"));
 /// ```
 pub fn validate(data: &[u8]) -> bool {
-    data.iter().all(|i| value_of_digit(*i).is_ok())
+    data.iter().all(|i| value_of_digit(*i).is_valid())
 }
 
 /// Check if `data` is valid zbase32 encoded string
@@ -288,9 +323,10 @@ mod tests {
     extern crate rand;
 
     use super::*;
-    #[cfg(feature = "unstable")]
     use tests::rand::Rng;
 
+    const INVALID_TEST_DATA: &[&str] = &["ybndrfg8ejkmcpqxot1uwisza345H769", "bnℕe", "uv", "l"];
+    const SPACE_CHARS: &[u8] = b" \t\n";
     #[cfg_attr(rustfmt, rustfmt_skip)]
     const TEST_DATA: &[(u64, &str, &[u8])] = &[
         (0,   "",       &[]),
@@ -309,9 +345,6 @@ mod tests {
                                                     0x35, 0xcf, 0x84, 0x65, 0x3a, 0x56, 0xd7, 0xc6,
                                                     0x75, 0xbe, 0x77, 0xdf])
     ];
-
-    const INVALID_TEST_DATA: &[&str] = &["ybndrfg8ejkmcpqxot1uwisza345H769", "bnℕe", "uv", "l"];
-
     #[cfg(feature = "unstable")]
     const ONE_MIB: usize = 1048576;
 
@@ -320,6 +353,26 @@ mod tests {
         for &(bits, zbase32, data) in TEST_DATA {
             assert_eq!(decode(zbase32.as_bytes(), bits).unwrap(), data);
         }
+    }
+
+    #[test]
+    fn test_decode_with_whitespace() {
+        for &(bits, zbase32, data) in TEST_DATA {
+            let mut with_whitespace = Vec::new();
+            for c in zbase32.as_bytes() {
+                with_whitespace.extend(&add_whitespace(*c));
+            }
+            assert_eq!(decode(&with_whitespace, bits).unwrap(), data);
+        }
+    }
+
+    fn add_whitespace(char: u8) -> Vec<u8> {
+        let mut gen = rand::thread_rng();
+        let mut result = Vec::new();
+        result.extend((0..gen.gen_range(0, 3)).map(|_| *gen.choose(&SPACE_CHARS).unwrap()));
+        result.push(char);
+        result.extend((0..gen.gen_range(0, 3)).map(|_| *gen.choose(&SPACE_CHARS).unwrap()));
+        result
     }
 
     #[test]
@@ -358,6 +411,12 @@ mod tests {
     #[should_panic(expected = "zbase64 slice too short")]
     fn test_decode_short_slice() {
         decode(b"oyoy", 4 * 5 + 1).unwrap();
+    }
+
+    #[test]
+    #[should_panic(expected = "zbase64 slice too short")]
+    fn test_decode_short_slice_with_whitespace() {
+        decode(b"oyoy ", 4 * 5 + 1).unwrap();
     }
 
     #[test]
@@ -445,6 +504,6 @@ mod tests {
     #[cfg(feature = "unstable")]
     fn random_encoded_data(bytes: usize) -> Vec<u8> {
         let mut gen = rand::thread_rng();
-        (0..bytes*8/5).map(|_| *gen.choose(ALPHABET).unwrap()).collect()
+        (0..bytes * 8 / 5).map(|_| *gen.choose(ALPHABET).unwrap()).collect()
     }
 }

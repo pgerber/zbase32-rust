@@ -6,6 +6,9 @@ extern crate zbase32;
 use quickcheck::{Arbitrary, Gen, TestResult};
 use rand::Rng;
 
+const ALPHABET_WITH_WHITESPACE: &[u8; 35] = b"ybndrfg8ejkmcpqxot1uwisza345h769 \t\n";
+const WHITESPACE: &[u8; 3] = b" \t\n";
+
 quickcheck! {
     fn test_recode(data: Vec<u8>) -> bool {
         let encoded = zbase32::encode(&data, data.len() as u64 * 8);
@@ -78,11 +81,15 @@ quickcheck! {
 
 quickcheck! {
     fn recode_partial(data: ZBaseEncodedData) -> bool {
-        let len_bits = (data.as_bytes().len() as u64) * 5;
-        let rand_bits = rand::thread_rng().gen_range(0, len_bits);
-        println!("data length: {} bits, requested length: {} bits", len_bits, rand_bits);
+        let rand_bits = if data.bit_len() > 0 {
+            rand::thread_rng().gen_range(0, data.bit_len())
+        } else {
+            0
+        };
+        println!("data length: {} bits, requested length: {} bits", data.bit_len(), rand_bits);
         let decoded1 = zbase32::decode(&data.as_bytes(), rand_bits).unwrap();
         let encoded = zbase32::encode(&decoded1, rand_bits);
+        cmp_ignore_whitespace(data.as_bytes(), encoded.as_bytes());
         let decoded2 = zbase32::decode_str(&encoded, rand_bits).unwrap();
         decoded1 == decoded2
     }
@@ -107,13 +114,22 @@ quickcheck! {
     }
 }
 
+fn cmp_ignore_whitespace<'a, A, B>(a: A, b: B) -> bool
+    where A: IntoIterator<Item = &'a u8>,
+          B: IntoIterator<Item = &'a u8>
+{
+    a.into_iter()
+        .filter(|i| !WHITESPACE.contains(i))
+        .eq(b.into_iter().filter(|i| !WHITESPACE.contains(i)))
+}
+
 #[derive(Clone, Debug)]
 struct ZBaseEncodedData(Vec<u8>);
 
 impl Arbitrary for ZBaseEncodedData {
     fn arbitrary<G: Gen>(g: &mut G) -> Self {
-        let len = g.gen_range(1, 256);
-        let content = (0..len).map(|_| *g.choose(zbase32::ALPHABET).unwrap()).collect();
+        let len = g.gen_range(0, 256);
+        let content = (0..len).map(|_| *g.choose(ALPHABET_WITH_WHITESPACE).unwrap()).collect();
         ZBaseEncodedData(content)
     }
 }
@@ -125,5 +141,9 @@ impl ZBaseEncodedData {
 
     fn into_bytes(self) -> Vec<u8> {
         self.0
+    }
+
+    fn bit_len(&self) -> u64 {
+        self.0.iter().filter(|i| !WHITESPACE.contains(i)).count() as u64 * 5
     }
 }
