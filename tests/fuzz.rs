@@ -3,7 +3,7 @@ extern crate quickcheck;
 extern crate rand;
 extern crate zbase32;
 
-use quickcheck::{Arbitrary, Gen};
+use quickcheck::{Arbitrary, Gen, TestResult};
 use rand::Rng;
 
 quickcheck! {
@@ -29,12 +29,40 @@ quickcheck! {
 }
 
 quickcheck! {
-    fn try_decode(data: Vec<u8>) -> bool {
+    fn try_decode_ok(data: Vec<u8>) -> TestResult {
         if zbase32::validate(&data) {
-            zbase32::decode_full_bytes(&data).is_ok()
+            TestResult::from_bool(zbase32::decode_full_bytes(&data).is_ok())
         } else {
-            zbase32::decode_full_bytes(&data).is_err()
+            TestResult::discard()
         }
+    }
+}
+
+quickcheck! {
+    fn try_decode_err(data: Vec<u8>) -> TestResult {
+        if zbase32::validate(&data) {
+            TestResult::discard()
+        } else {
+            TestResult::from_bool(zbase32::decode_full_bytes(&data).is_err())
+        }
+    }
+}
+
+quickcheck! {
+    fn data_len_exceeds_bits_when_encoding(data: Vec<u8>, arbitrary: u8) -> TestResult {
+        TestResult::must_fail(move || {
+            let len = data.len() as u64 * 8 + 1 + arbitrary as u64;
+            zbase32::encode(&data, len);
+        })
+    }
+}
+
+quickcheck! {
+    fn data_len_exceeds_bits_when_ecoding(data: ZBaseEncodedData, arbitrary: u8) -> TestResult {
+        TestResult::must_fail(move || {
+            let len = data.as_bytes().len() as u64 * 5 + 1 + arbitrary as u64;
+            let _ = zbase32::decode(data.as_bytes(), len);
+        })
     }
 }
 
