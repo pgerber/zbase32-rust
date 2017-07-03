@@ -87,7 +87,7 @@ fn value_of_digit(digit: u8) -> Result<u8, &'static str> {
 /// assert_eq!(zbase32::decode(b"o", 1).unwrap(), &[0x80]);
 /// ```
 pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
-    assert!(zbase32.len() as u64 * 5 >= bits, "zbase64 slice too short");
+    assert!(zbase32.len() as u64 * 5 >= bits, "zbase32 slice too short");
     let capacity = if bits % 8 == 0 {
         bits / 8
     } else {
@@ -355,7 +355,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "zbase64 slice too short")]
+    #[should_panic(expected = "zbase32 slice too short")]
     fn test_decode_short_slice() {
         decode(b"oyoy", 4 * 5 + 1).unwrap();
     }
