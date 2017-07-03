@@ -15,15 +15,8 @@ quickcheck! {
         let decoded = zbase32::decode(&encoded.as_bytes(), data.len() as u64 * 8).unwrap();
         let decoded_bytes = zbase32::decode_full_bytes(&encoded.as_bytes()).unwrap();
         assert_eq!(decoded[..], decoded_bytes[..data.len()]);
-
-        // `decoded_bytes` may add an additional byte since it doesn't know the original size.
-        // The size is simply assumed to be `encoded.len() * 5`.
-        if (encoded.len() * 5) % 8 == 0 {
-            assert_eq!(decoded_bytes.len(), data.len())
-        } else {
-            assert_eq!(decoded_bytes[data.len()..], [0x00][..]);
-        }
-
+        assert_eq!(data.len(), (encoded.len() * 5) / 8);
+        assert!(decoded_bytes.len() - data.len() < 8);
         data == decoded
     }
 }
@@ -67,12 +60,11 @@ quickcheck! {
 }
 
 quickcheck! {
-    fn encode_too_long(data: Vec<u8>) -> bool {
+    fn encode_too_long(data: Vec<u8>) -> () {
         let len_bits = (data.len() as u64) * 8;
         let rand_bits = if len_bits > 0 { rand::thread_rng().gen_range(0, len_bits) } else { 0 };
         println!("data length: {} bits, requested length: {} bits", len_bits, rand_bits);
         zbase32::encode(&data, rand_bits);
-        true
     }
 }
 

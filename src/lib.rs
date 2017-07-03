@@ -127,6 +127,10 @@ pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
 ///
 /// Just like `decode` but doesn't allow decoding with bit precision.
 ///
+/// This decodes full bytes. For instance, if you have `b"yy"`, you'll get one
+/// byte back. `b"yy"` can enode 10 bits (2 * 5) which is truncated at the next
+/// lower byte boundary.
+///
 /// # Examples
 ///
 /// ```
@@ -136,7 +140,8 @@ pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
 /// ```
 #[inline]
 pub fn decode_full_bytes(zbase: &[u8]) -> Result<Vec<u8>, &'static str> {
-    decode(zbase, zbase.len() as u64 * 5)
+    let size =  zbase.len() as u64 * 5;
+    decode(zbase, size / 8 * 8)
 }
 
 /// Decode first N `bits` of given zbase32 encoded string
@@ -326,8 +331,10 @@ mod tests {
     #[cfg_attr(rustfmt, rustfmt_skip)]
     fn test_decode_full_bytes() {
         let test_data: &[(&[u8], &[u8])] = &[
-            (b"6n9hq", &[0xf0, 0xbf, 0xc7, 0x00]),
-            (b"4t7ye", &[0xd4, 0x7a, 0x04, 0x00]),
+            (b"9",     &[]),
+            (b"y9",    &[0x07]),
+            (b"6n9hq", &[0xf0, 0xbf, 0xc7]),
+            (b"4t7ye", &[0xd4, 0x7a, 0x04]),
             (b"ybndrfg8ejkmcpqxot1uwisza345h769", &[0x00, 0x44, 0x32, 0x14, 0xc7, 0x42, 0x54, 0xb6,
                                                     0x35, 0xcf, 0x84, 0x65, 0x3a, 0x56, 0xd7, 0xc6,
                                                     0x75, 0xbe, 0x77, 0xdf])
