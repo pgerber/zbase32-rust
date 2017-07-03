@@ -1,6 +1,6 @@
 [package]
 name = "zbase32"
-version = "0.0.5"
+version = "0.0.6"
 description = "Implementation of zbase32."
 documentation = "https://docs.rs/two-lock-queue"
 repository = "https://github.com/pgerber/zbase32-rust"
