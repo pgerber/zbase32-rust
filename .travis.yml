@@ -1,8 +1,10 @@
 language: rust
+dist: trusty
 rust:
   - stable
   - beta
   - nightly
+env: LD_LIBRARY_PATH=/opt/python/3.6.0/lib/
 matrix:
   allow_failures:
     - rust: nightly
@@ -16,14 +18,17 @@ addons:
       - cmake
       - gcc
       - binutils-dev
+install:
+  - git clone https://github.com/tobyn/zbase32.git pyzbase32
+  - cd pyzbase32 && python3 ./setup.py install --user
 script:
   # not on nightly
   - '[[ "$TRAVIS_RUST_VERSION" = "nightly" ]] || cargo rustc --lib --verbose -- -D warnings'
-  - '[[ "$TRAVIS_RUST_VERSION" = "nightly" ]] || cargo test --verbose'
+  - '[[ "$TRAVIS_RUST_VERSION" = "nightly" ]] || cargo test --verbose --features python_tests'
 
   # nightly only
   - '[[ "$TRAVIS_RUST_VERSION" != "nightly" ]] || cargo rustc --lib --verbose --features clippy -- -D warnings'
-  - '[[ "$TRAVIS_RUST_VERSION" != "nightly" ]] || cargo test --verbose --features unstable'
+  - '[[ "$TRAVIS_RUST_VERSION" != "nightly" ]] || cargo test --verbose --features unstable,python_tests'
 after_success: |
   # code coverage
   if [[ "$TRAVIS_RUST_VERSION" = "stable" ]]; then

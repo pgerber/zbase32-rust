@@ -140,7 +140,7 @@ pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
 /// ```
 #[inline]
 pub fn decode_full_bytes(zbase: &[u8]) -> Result<Vec<u8>, &'static str> {
-    let size =  zbase.len() as u64 * 5;
+    let size = zbase.len() as u64 * 5;
     decode(zbase, size / 8 * 8)
 }
 
@@ -452,6 +452,6 @@ mod tests {
     #[cfg(feature = "unstable")]
     fn random_encoded_data(bytes: usize) -> Vec<u8> {
         let mut gen = rand::thread_rng();
-        (0..bytes*8/5).map(|_| *gen.choose(ALPHABET).unwrap()).collect()
+        (0..bytes * 8 / 5).map(|_| *gen.choose(ALPHABET).unwrap()).collect()
     }
 }

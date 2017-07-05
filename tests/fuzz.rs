@@ -1,10 +1,11 @@
 #[macro_use]
 extern crate quickcheck;
-extern crate rand;
 extern crate zbase32;
 
-use quickcheck::{Arbitrary, Gen, TestResult};
-use rand::Rng;
+mod common;
+use common::*;
+
+use quickcheck::TestResult;
 
 quickcheck! {
     fn test_recode(data: Vec<u8>) -> bool {
@@ -61,18 +62,14 @@ quickcheck! {
 
 quickcheck! {
     fn encode_too_long(data: Vec<u8>) -> () {
-        let len_bits = (data.len() as u64) * 8;
-        let rand_bits = if len_bits > 0 { rand::thread_rng().gen_range(0, len_bits) } else { 0 };
-        println!("data length: {} bits, requested length: {} bits", len_bits, rand_bits);
+        let rand_bits = rand_bit_length(data.len(), 8);
         zbase32::encode(&data, rand_bits);
     }
 }
 
 quickcheck! {
     fn recode_partial(data: ZBaseEncodedData) -> bool {
-        let len_bits = (data.as_bytes().len() as u64) * 5;
-        let rand_bits = rand::thread_rng().gen_range(0, len_bits);
-        println!("data length: {} bits, requested length: {} bits", len_bits, rand_bits);
+        let rand_bits = rand_bit_length(data.len(), 5);
         let decoded1 = zbase32::decode(&data.as_bytes(), rand_bits).unwrap();
         let encoded = zbase32::encode(&decoded1, rand_bits);
         let decoded2 = zbase32::decode_str(&encoded, rand_bits).unwrap();
@@ -96,26 +93,5 @@ quickcheck! {
     fn validate_str(data: ZBaseEncodedData) -> bool {
         let data = String::from_utf8(data.into_bytes()).unwrap();
         zbase32::validate_str(&data)
-    }
-}
-
-#[derive(Clone, Debug)]
-struct ZBaseEncodedData(Vec<u8>);
-
-impl Arbitrary for ZBaseEncodedData {
-    fn arbitrary<G: Gen>(g: &mut G) -> Self {
-        let len = g.gen_range(1, 256);
-        let content = (0..len).map(|_| *g.choose(zbase32::ALPHABET).unwrap()).collect();
-        ZBaseEncodedData(content)
-    }
-}
-
-impl ZBaseEncodedData {
-    fn as_bytes(&self) -> &[u8] {
-        &self.0
-    }
-
-    fn into_bytes(self) -> Vec<u8> {
-        self.0
     }
 }
