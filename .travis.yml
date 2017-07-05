@@ -20,7 +20,7 @@ addons:
       - binutils-dev
 install:
   - git clone https://github.com/tobyn/zbase32.git pyzbase32
-  - cd pyzbase32 && python3 ./setup.py install --user
+  - ( cd pyzbase32 && python3 ./setup.py install --user )
 script:
   # not on nightly
   - '[[ "$TRAVIS_RUST_VERSION" = "nightly" ]] || cargo rustc --lib --verbose -- -D warnings'
@@ -43,8 +43,9 @@ after_success: |
       cd ../.. &&
       rm -rf kcov-master &&
       for file in target/debug/*-[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]; do
+          [[ "$file" =~ ^target/debug/pyzbase32- ]] && continue
           mkdir -p "target/cov/$(basename $file)";
-          kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$(basename $file)" "$file";
+          kcov --exclude-pattern=/.cargo,/usr/lib --skip-solibs --verify "target/cov/$(basename $file)" "$file";
       done &&
       bash <(curl -s https://codecov.io/bash) &&
       echo "Uploaded code coverage"
