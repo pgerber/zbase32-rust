@@ -43,10 +43,10 @@ after_success: |
       cd ../.. &&
       rm -rf kcov-master &&
       for file in target/debug/*-[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]; do
-          [[ "$file" =~ ^target/debug/pyzbase32- ]] && continue
-          mkdir -p "target/cov/$(basename $file)";
-          kcov --exclude-pattern=/.cargo,/usr/lib --skip-solibs --verify "target/cov/$(basename $file)" "$file";
+          mkdir -p "target/cov/$(basename $file)" || err=true
+          kcov --exclude-pattern=/.cargo,/usr/lib --skip-solibs --verify "target/cov/$(basename $file)" "$file" || err=true;
       done &&
+      [[ "${err-}" != "true" ]] &&
       bash <(curl -s https://codecov.io/bash) &&
       echo "Uploaded code coverage"
   fi
