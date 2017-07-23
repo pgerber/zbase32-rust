@@ -2,6 +2,79 @@
 //!
 //! This is an implementation of the human-oriented base-32 encoding called
 //! [zbase32](https://philzimmermann.com/docs/human-oriented-base-32-encoding.txt).
+//!
+//! # Encoding Bits
+//!
+//! ```
+//! let src = &[0xff];
+//! let encoded = zbase32::encode(src, 4);
+//! let decoded = zbase32::decode(&encoded.as_bytes(), 4).unwrap();
+//!
+//! // Only the first 4 bits are kept and then padded with 0s.
+//! assert_eq!(&decoded, &[0xf0]);
+//! ```
+//!
+//! # Decoding Bits
+//!
+//! ```
+//! let encoded = b"9yi"; // 0b11111_00000_10101
+//! let decoded = zbase32::decode(encoded, 15).unwrap();
+//! // 0b1111_1000_0010_1010 (zero padded right)
+//! assert_eq!(&decoded, &[0xf8 ,0x2a]);
+//! ```
+//!
+//! ```
+//! let invalid = b"9yXie";
+//! assert_eq!(zbase32::decode(invalid, 25).unwrap_err(), "not a zbase32 digit");
+//! ```
+//!
+//! # Encoding Full Bytes
+//!
+//! ```
+//! let decoded = &[0xdd, 0xaa, 0xcc];
+//! let encoded = zbase32::encode_full_bytes(decoded);
+//! assert_eq!(&encoded, &"5sica");
+//! ```
+//!
+//! # Decoding Full Bytes
+//!
+//! ```
+//! let encoded = b"3uxy"; // max. 20 bits of information
+//! let decoded = zbase32::decode_full_bytes(encoded).unwrap();
+//!
+//! // Only the first 16 bits (2 bytes) are decoded.
+//! assert_eq!(&decoded, &[0xcc, 0xde]);
+//! ```
+//!
+//! ```
+//! let invalid = b"9yXie";
+//! assert_eq!(zbase32::decode_full_bytes(invalid).unwrap_err(), "not a zbase32 digit");
+//! ```
+//!
+//! # Panics
+//!
+//! Panics if given number of bits exceeds the size of the input data.
+//!
+//! ```should_panic(expected = "zbase32 slice too short")
+//! # use std::panic;
+//! // should_panic(expected = "zbase32 slice too short")
+//! zbase32::decode(b"9yi", 16);
+//! ```
+//!
+//! ```should_panic(expect = "slice too short")
+//! # use std::panic;
+//! // should_panic(expected = "slice too short")
+//! zbase32::encode(&[0x12, 0x23], 17);
+//! ```
+//!
+//! ```
+//! # use std::panic;
+//! let result = panic::catch_unwind(|| {
+//!     let _ = zbase32::encode(&[0x12, 0x23], 17);
+//! });
+//! assert_eq!(result.unwrap_err().downcast_ref::<&'static str>().unwrap(), &"slice too short");
+//! ```
+
 
 #![cfg_attr(feature="clippy", feature(plugin))]
 #![cfg_attr(feature="clippy", plugin(clippy))]
