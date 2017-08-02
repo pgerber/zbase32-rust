@@ -202,25 +202,11 @@ pub fn encode(data: &[u8], bits: u64) -> String {
     let mut result = Vec::with_capacity(capacity);
 
     let mut bits_remaining = bits;
-    let mut bit_offset: u8 = 0;
+    let mut bit_offset: u8 = 16;
     let mut remaining = data;
-    let mut buffer = match data.len() {
-        0 => !0 /* unused */,
-        1 => (data[0] as u16) << 8,
-        _ => {
-            remaining = &data[2..];
-            (data[0] as u16) << 8 | data[1] as u16
-        }
-    };
+    let mut buffer = !0;
 
     while bits_remaining > 0 {
-        let unused_bits = 5_u64.saturating_sub(bits_remaining);
-        let index = (buffer >> (16 - 5 - bit_offset + unused_bits as u8) << unused_bits) & 0x1f;
-        result.push(ALPHABET[index as usize]);
-
-        bit_offset += 5;
-        bits_remaining -= 5 - unused_bits;
-
         if bit_offset >= 8 {
             match remaining.split_first() {
                 Some((first, others)) => {
@@ -233,6 +219,13 @@ pub fn encode(data: &[u8], bits: u64) -> String {
             }
             bit_offset -= 8;
         }
+
+        let unused_bits = 5_u64.saturating_sub(bits_remaining);
+        let index = (buffer >> (16 - 5 - bit_offset + unused_bits as u8) << unused_bits) & 0x1f;
+        result.push(ALPHABET[index as usize]);
+
+        bit_offset += 5;
+        bits_remaining -= 5 - unused_bits;
     }
 
     debug_assert_eq!(capacity, result.len());
