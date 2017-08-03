@@ -208,20 +208,15 @@ pub fn encode(data: &[u8], bits: u64) -> String {
 
     while bits_remaining > 0 {
         if bit_offset >= 8 {
-            match remaining.split_first() {
-                Some((first, others)) => {
-                    buffer = buffer << 8 | *first as u16;
-                    remaining = others;
-                }
-                None => {
-                    buffer <<= 8;
-                }
+            if let Some((first, others)) = remaining.split_first() {
+                buffer = buffer << 8 | *first as u16;
+                remaining = others;
+                bit_offset -= 8;
             }
-            bit_offset -= 8;
         }
 
         let unused_bits = 5_u64.saturating_sub(bits_remaining);
-        let index = (buffer >> (16 - 5 - bit_offset + unused_bits as u8) << unused_bits) & 0x1f;
+        let index = (buffer >> (unused_bits as u8 + 16 - 5 - bit_offset) << unused_bits) & 0x1f;
         result.push(ALPHABET[index as usize]);
 
         bit_offset += 5;
