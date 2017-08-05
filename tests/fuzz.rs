@@ -15,9 +15,7 @@ quickcheck! {
 
         let decoded = zbase32::decode(&encoded.as_bytes(), data.len() as u64 * 8).unwrap();
         let decoded_bytes = zbase32::decode_full_bytes(&encoded.as_bytes()).unwrap();
-        assert_eq!(decoded[..], decoded_bytes[..data.len()]);
-        assert_eq!(data.len(), (encoded.len() * 5) / 8);
-        assert!(decoded_bytes.len() - data.len() < 8);
+        assert_eq!(decoded, decoded_bytes);
         data == decoded
     }
 }
