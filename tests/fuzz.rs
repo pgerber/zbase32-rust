@@ -42,8 +42,8 @@ quickcheck! {
 
 quickcheck! {
     fn data_len_exceeds_bits_when_encoding(data: Vec<u8>, arbitrary: u8) -> TestResult {
+        let len = data.len() as u64 * 8 + 1 + arbitrary as u64;
         TestResult::must_fail(move || {
-            let len = data.len() as u64 * 8 + 1 + arbitrary as u64;
             zbase32::encode(&data, len);
         })
     }
@@ -51,8 +51,8 @@ quickcheck! {
 
 quickcheck! {
     fn data_len_exceeds_bits_when_ecoding(data: ZBaseEncodedData, arbitrary: u8) -> TestResult {
+        let len = data.as_bytes().len() as u64 * 5 + 1 + arbitrary as u64;
         TestResult::must_fail(move || {
-            let len = data.as_bytes().len() as u64 * 5 + 1 + arbitrary as u64;
             let _ = zbase32::decode(data.as_bytes(), len);
         })
     }
