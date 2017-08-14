@@ -34,42 +34,66 @@
 /// Alphabet used by zbase32
 pub const ALPHABET: &[u8; 32] = b"ybndrfg8ejkmcpqxot1uwisza345h769";
 
+const CONVERSION_TABLE: &[Option<u8>; 256] = &[
+    /*   0 */ None,       None,       None,       None,       None,
+    /*   5 */ None,       None,       None,       None,       None,
+    /*  10 */ None,       None,       None,       None,       None,
+    /*  15 */ None,       None,       None,       None,       None,
+    /*  20 */ None,       None,       None,       None,       None,
+    /*  25 */ None,       None,       None,       None,       None,
+    /*  30 */ None,       None,       None,       None,       None,
+    /*  35 */ None,       None,       None,       None,       None,
+    /*  40 */ None,       None,       None,       None,       None,
+    /*  45 */ None,       None,       None,       None,       Some(0x12),
+    /*  50 */ None,       Some(0x19), Some(0x1a), Some(0x1b), Some(0x1e),
+    /*  55 */ Some(0x1d), Some(0x07), Some(0x1f), None,       None,
+    /*  60 */ None,       None,       None,       None,       None,
+    /*  65 */ None,       None,       None,       None,       None,
+    /*  70 */ None,       None,       None,       None,       None,
+    /*  75 */ None,       None,       None,       None,       None,
+    /*  80 */ None,       None,       None,       None,       None,
+    /*  85 */ None,       None,       None,       None,       None,
+    /*  90 */ None,       None,       None,       None,       None,
+    /*  95 */ None,       None,       Some(0x18), Some(0x01), Some(0x0c),
+    /* 100 */ Some(0x03), Some(0x08), Some(0x05), Some(0x06), Some(0x1c),
+    /* 105 */ Some(0x15), Some(0x09), Some(0x0a), None,       Some(0x0b),
+    /* 110 */ Some(0x02), Some(0x10), Some(0x0d), Some(0x0e), Some(0x04),
+    /* 115 */ Some(0x16), Some(0x11), Some(0x13), None,       Some(0x14),
+    /* 120 */ Some(0x0f), Some(0x00), Some(0x17), None,       None,
+    /* 125 */ None,       None,       None,       None,       None,
+    /* 130 */ None,       None,       None,       None,       None,
+    /* 135 */ None,       None,       None,       None,       None,
+    /* 140 */ None,       None,       None,       None,       None,
+    /* 145 */ None,       None,       None,       None,       None,
+    /* 150 */ None,       None,       None,       None,       None,
+    /* 155 */ None,       None,       None,       None,       None,
+    /* 160 */ None,       None,       None,       None,       None,
+    /* 165 */ None,       None,       None,       None,       None,
+    /* 170 */ None,       None,       None,       None,       None,
+    /* 175 */ None,       None,       None,       None,       None,
+    /* 180 */ None,       None,       None,       None,       None,
+    /* 185 */ None,       None,       None,       None,       None,
+    /* 190 */ None,       None,       None,       None,       None,
+    /* 195 */ None,       None,       None,       None,       None,
+    /* 200 */ None,       None,       None,       None,       None,
+    /* 205 */ None,       None,       None,       None,       None,
+    /* 210 */ None,       None,       None,       None,       None,
+    /* 215 */ None,       None,       None,       None,       None,
+    /* 220 */ None,       None,       None,       None,       None,
+    /* 225 */ None,       None,       None,       None,       None,
+    /* 230 */ None,       None,       None,       None,       None,
+    /* 235 */ None,       None,       None,       None,       None,
+    /* 240 */ None,       None,       None,       None,       None,
+    /* 245 */ None,       None,       None,       None,       None,
+    /* 250 */ None,       None,       None,       None,       None,
+    /* 255 */ None
+];
+
 #[inline]
 fn value_of_digit(digit: u8) -> Result<u8, &'static str> {
-    match digit {
-        b'y' => Ok(0x00),
-        b'b' => Ok(0x01),
-        b'n' => Ok(0x02),
-        b'd' => Ok(0x03),
-        b'r' => Ok(0x04),
-        b'f' => Ok(0x05),
-        b'g' => Ok(0x06),
-        b'8' => Ok(0x07),
-        b'e' => Ok(0x08),
-        b'j' => Ok(0x09),
-        b'k' => Ok(0x0a),
-        b'm' => Ok(0x0b),
-        b'c' => Ok(0x0c),
-        b'p' => Ok(0x0d),
-        b'q' => Ok(0x0e),
-        b'x' => Ok(0x0f),
-        b'o' => Ok(0x10),
-        b't' => Ok(0x11),
-        b'1' => Ok(0x12),
-        b'u' => Ok(0x13),
-        b'w' => Ok(0x14),
-        b'i' => Ok(0x15),
-        b's' => Ok(0x16),
-        b'z' => Ok(0x17),
-        b'a' => Ok(0x18),
-        b'3' => Ok(0x19),
-        b'4' => Ok(0x1a),
-        b'5' => Ok(0x1b),
-        b'h' => Ok(0x1c),
-        b'7' => Ok(0x1d),
-        b'6' => Ok(0x1e),
-        b'9' => Ok(0x1f),
-        _ => Err("not a zbase32 digit"),
+    match CONVERSION_TABLE[digit as usize] {
+        Some(v) => Ok(v),
+        None => Err("not a zbase32 digit")
     }
 }
 
@@ -394,6 +418,22 @@ mod tests {
         for string in INVALID_TEST_DATA.iter() {
             assert!(!validate(string.as_bytes()));
             assert!(!validate_str(string));
+        }
+    }
+
+    #[test]
+    fn test_valid_and_invalid_chars() {
+        for char in (0_u16..256).map(|i| i as u8) {
+            let bytes = &[char];
+            if ALPHABET.contains(&char) {
+                assert_eq!(ALPHABET[value_of_digit(char).unwrap() as usize], char);
+                assert_eq!(encode(&decode(bytes, 5).unwrap(), 5).as_bytes(), bytes);
+                assert!(validate(bytes));
+            } else {
+                assert!(value_of_digit(char).is_err());
+                assert!(decode_full_bytes(bytes).is_err());
+                assert!(!validate(bytes));
+            }
         }
     }
 
