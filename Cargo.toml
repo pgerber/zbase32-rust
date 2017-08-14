@@ -2,7 +2,7 @@
 name = "zbase32"
 version = "0.1.1"
 description = "Implementation of zbase32."
-documentation = "https://docs.rs/two-lock-queue"
+documentation = "https://docs.rs/zbase32"
 repository = "https://github.com/pgerber/zbase32-rust"
 authors = ["Peter Gerber <peter@arbitrary.ch>"]
 keywords = ["zbase32"]
