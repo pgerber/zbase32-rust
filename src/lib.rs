@@ -124,9 +124,9 @@ pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
     let mut buffer: u16 = !0;
     for digit in zbase32 {
         let value = value_of_digit(*digit)?;
-        buffer = (buffer << 5) | value as u16;
+        buffer = (buffer << 5) | u16::from(value);
         buffer_size += 5;
-        if bits_remaining < 8 && buffer_size as u64 >= bits_remaining {
+        if bits_remaining < 8 && u64::from(buffer_size) >= bits_remaining {
             break;
         }
         if buffer_size >= 8 {
@@ -233,7 +233,7 @@ pub fn encode(data: &[u8], bits: u64) -> String {
     while bits_remaining > 0 {
         if bit_offset >= 8 {
             if let Some((first, others)) = remaining.split_first() {
-                buffer = buffer << 8 | *first as u16;
+                buffer = buffer << 8 | u16::from(*first);
                 remaining = others;
                 bit_offset -= 8;
             }
