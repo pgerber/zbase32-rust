@@ -51,15 +51,19 @@ fn py_encode(input: &[u8], bits: Option<u64>) -> PyResult<String> {
     locals.set_item(py, "pyzbase32", py.import("pyzbase32")?)?;
     locals.set_item(py, "input", PyBytes::new(py, input))?;
     let result: String = if let Some(bits) = bits {
-            locals.set_item(py, "bits", bits)?;
-            py.eval("pyzbase32.encode(input, bits).decode()",
-                    None,
-                    Some(&locals))
-        } else {
-            py.eval("pyzbase32.encode_bytes(input).decode()",
-                    None,
-                    Some(&locals))
-        }?
+        locals.set_item(py, "bits", bits)?;
+        py.eval(
+            "pyzbase32.encode(input, bits).decode()",
+            None,
+            Some(&locals),
+        )
+    } else {
+        py.eval(
+            "pyzbase32.encode_bytes(input).decode()",
+            None,
+            Some(&locals),
+        )
+    }?
         .extract(py)?;
     Ok(result)
 }
@@ -71,11 +75,11 @@ fn py_decode(input: &[u8], bits: Option<u64>) -> PyResult<Vec<u8>> {
     locals.set_item(py, "pyzbase32", py.import("pyzbase32")?)?;
     locals.set_item(py, "input", PyBytes::new(py, input))?;
     let result: PyBytes = if let Some(bits) = bits {
-            locals.set_item(py, "bits", bits)?;
-            py.eval("pyzbase32.decode(input, bits)", None, Some(&locals))
-        } else {
-            py.eval("pyzbase32.decode_bytes(input)", None, Some(&locals))
-        }?
+        locals.set_item(py, "bits", bits)?;
+        py.eval("pyzbase32.decode(input, bits)", None, Some(&locals))
+    } else {
+        py.eval("pyzbase32.decode_bytes(input)", None, Some(&locals))
+    }?
         .extract(py)?;
     Ok(Vec::from(result.data(py)))
 }

@@ -34,6 +34,7 @@
 /// Alphabet used by zbase32
 pub const ALPHABET: &[u8; 32] = b"ybndrfg8ejkmcpqxot1uwisza345h769";
 
+#[cfg_attr(rustfmt, rustfmt_skip)]
 const CONVERSION_TABLE: &[Option<u8>; 256] = &[
     /*   0 */ None,       None,       None,       None,       None,
     /*   5 */ None,       None,       None,       None,       None,
@@ -93,7 +94,7 @@ const CONVERSION_TABLE: &[Option<u8>; 256] = &[
 fn value_of_digit(digit: u8) -> Result<u8, &'static str> {
     match CONVERSION_TABLE[digit as usize] {
         Some(v) => Ok(v),
-        None => Err("not a zbase32 digit")
+        None => Err("not a zbase32 digit"),
     }
 }
 
@@ -480,6 +481,8 @@ mod tests {
     #[cfg(feature = "unstable")]
     fn random_encoded_data(bytes: usize) -> Vec<u8> {
         let mut gen = rand::thread_rng();
-        (0..bytes * 8 / 5).map(|_| *gen.choose(ALPHABET).unwrap()).collect()
+        (0..bytes * 8 / 5)
+            .map(|_| *gen.choose(ALPHABET).unwrap())
+            .collect()
     }
 }

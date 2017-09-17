@@ -11,7 +11,9 @@ pub struct ZBaseEncodedData(Vec<u8>);
 impl Arbitrary for ZBaseEncodedData {
     fn arbitrary<G: Gen>(g: &mut G) -> Self {
         let len = g.gen_range(0, 256);
-        let content = (0..len).map(|_| *g.choose(zbase32::ALPHABET).unwrap()).collect();
+        let content = (0..len)
+            .map(|_| *g.choose(zbase32::ALPHABET).unwrap())
+            .collect();
         ZBaseEncodedData(content)
     }
 }
