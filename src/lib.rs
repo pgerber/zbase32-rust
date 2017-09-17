@@ -30,6 +30,9 @@
 #![cfg_attr(feature = "clippy", deny(wrong_pub_self_convention))]
 #![cfg_attr(feature = "clippy", deny(wrong_self_convention))]
 
+#![cfg_attr(all(test, feature = "clippy"), allow(option_unwrap_used))]
+#![cfg_attr(all(test, feature = "clippy"), allow(result_unwrap_used))]
+
 
 /// Alphabet used by zbase32
 pub const ALPHABET: &[u8; 32] = b"ybndrfg8ejkmcpqxot1uwisza345h769";
@@ -303,6 +306,7 @@ pub fn validate_str(data: &str) -> bool {
 mod tests {
     #[cfg(feature = "unstable")]
     extern crate test;
+    #[cfg(feature = "unstable")]
     extern crate rand;
 
     use super::*;
@@ -331,7 +335,7 @@ mod tests {
     const INVALID_TEST_DATA: &[&str] = &["ybndrfg8ejkmcpqxot1uwisza345H769", "bnℕe", "uv", "l"];
 
     #[cfg(feature = "unstable")]
-    const ONE_MIB: usize = 1048576;
+    const ONE_MIB: usize = 1_048_576;
 
     #[test]
     fn test_decode() {

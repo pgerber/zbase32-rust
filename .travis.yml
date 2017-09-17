@@ -30,6 +30,8 @@ script:
 
   # nightly only
   - '[[ "$TRAVIS_RUST_VERSION" != "nightly" ]] || cargo rustc --lib --verbose --features clippy -- -D warnings'
+  - '[[ "$TRAVIS_RUST_VERSION" != "nightly" ]] || cargo rustc --test fuzz --verbose --features clippy -- -D warnings'
+  - '[[ "$TRAVIS_RUST_VERSION" != "nightly" ]] || cargo rustc --test pyzbase32 --verbose --features clippy,python_tests -- -D warnings'
   - '[[ "$TRAVIS_RUST_VERSION" != "nightly" ]] || cargo test --verbose --features unstable,python_tests'
 after_success: |
   # code coverage
