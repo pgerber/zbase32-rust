@@ -35,63 +35,63 @@
 pub const ALPHABET: &[u8; 32] = b"ybndrfg8ejkmcpqxot1uwisza345h769";
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-const CONVERSION_TABLE: &[Option<u8>; 256] = &[
-    /*   0 */ None,       None,       None,       None,       None,
-    /*   5 */ None,       None,       None,       None,       None,
-    /*  10 */ None,       None,       None,       None,       None,
-    /*  15 */ None,       None,       None,       None,       None,
-    /*  20 */ None,       None,       None,       None,       None,
-    /*  25 */ None,       None,       None,       None,       None,
-    /*  30 */ None,       None,       None,       None,       None,
-    /*  35 */ None,       None,       None,       None,       None,
-    /*  40 */ None,       None,       None,       None,       None,
-    /*  45 */ None,       None,       None,       None,       Some(0x12),
-    /*  50 */ None,       Some(0x19), Some(0x1a), Some(0x1b), Some(0x1e),
-    /*  55 */ Some(0x1d), Some(0x07), Some(0x1f), None,       None,
-    /*  60 */ None,       None,       None,       None,       None,
-    /*  65 */ None,       None,       None,       None,       None,
-    /*  70 */ None,       None,       None,       None,       None,
-    /*  75 */ None,       None,       None,       None,       None,
-    /*  80 */ None,       None,       None,       None,       None,
-    /*  85 */ None,       None,       None,       None,       None,
-    /*  90 */ None,       None,       None,       None,       None,
-    /*  95 */ None,       None,       Some(0x18), Some(0x01), Some(0x0c),
-    /* 100 */ Some(0x03), Some(0x08), Some(0x05), Some(0x06), Some(0x1c),
-    /* 105 */ Some(0x15), Some(0x09), Some(0x0a), None,       Some(0x0b),
-    /* 110 */ Some(0x02), Some(0x10), Some(0x0d), Some(0x0e), Some(0x04),
-    /* 115 */ Some(0x16), Some(0x11), Some(0x13), None,       Some(0x14),
-    /* 120 */ Some(0x0f), Some(0x00), Some(0x17), None,       None,
-    /* 125 */ None,       None,       None,       None,       None,
-    /* 130 */ None,       None,       None,       None,       None,
-    /* 135 */ None,       None,       None,       None,       None,
-    /* 140 */ None,       None,       None,       None,       None,
-    /* 145 */ None,       None,       None,       None,       None,
-    /* 150 */ None,       None,       None,       None,       None,
-    /* 155 */ None,       None,       None,       None,       None,
-    /* 160 */ None,       None,       None,       None,       None,
-    /* 165 */ None,       None,       None,       None,       None,
-    /* 170 */ None,       None,       None,       None,       None,
-    /* 175 */ None,       None,       None,       None,       None,
-    /* 180 */ None,       None,       None,       None,       None,
-    /* 185 */ None,       None,       None,       None,       None,
-    /* 190 */ None,       None,       None,       None,       None,
-    /* 195 */ None,       None,       None,       None,       None,
-    /* 200 */ None,       None,       None,       None,       None,
-    /* 205 */ None,       None,       None,       None,       None,
-    /* 210 */ None,       None,       None,       None,       None,
-    /* 215 */ None,       None,       None,       None,       None,
-    /* 220 */ None,       None,       None,       None,       None,
-    /* 225 */ None,       None,       None,       None,       None,
-    /* 230 */ None,       None,       None,       None,       None,
-    /* 235 */ None,       None,       None,       None,       None,
-    /* 240 */ None,       None,       None,       None,       None,
-    /* 245 */ None,       None,       None,       None,       None,
-    /* 250 */ None,       None,       None,       None,       None,
-    /* 255 */ None
+const CONVERSION_TABLE: &[Result<u8, ()>; 256] = &[
+    /*   0 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /*   5 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /*  10 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /*  15 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /*  20 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /*  25 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /*  30 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /*  35 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /*  40 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /*  45 */ Err(()),  Err(()),  Err(()),  Err(()),  Ok(0x12),
+    /*  50 */ Err(()),  Ok(0x19), Ok(0x1a), Ok(0x1b), Ok(0x1e),
+    /*  55 */ Ok(0x1d), Ok(0x07), Ok(0x1f), Err(()),  Err(()),
+    /*  60 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /*  65 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /*  70 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /*  75 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /*  80 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /*  85 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /*  90 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /*  95 */ Err(()),  Err(()),  Ok(0x18), Ok(0x01), Ok(0x0c),
+    /* 100 */ Ok(0x03), Ok(0x08), Ok(0x05), Ok(0x06), Ok(0x1c),
+    /* 105 */ Ok(0x15), Ok(0x09), Ok(0x0a), Err(()),  Ok(0x0b),
+    /* 110 */ Ok(0x02), Ok(0x10), Ok(0x0d), Ok(0x0e), Ok(0x04),
+    /* 115 */ Ok(0x16), Ok(0x11), Ok(0x13), Err(()),  Ok(0x14),
+    /* 120 */ Ok(0x0f), Ok(0x00), Ok(0x17), Err(()),  Err(()),
+    /* 125 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 130 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 135 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 140 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 145 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 150 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 155 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 160 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 165 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 170 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 175 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 180 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 185 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 190 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 195 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 200 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 205 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 210 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 215 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 220 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 225 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 230 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 235 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 240 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 245 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 250 */ Err(()),  Err(()),  Err(()),  Err(()),  Err(()),
+    /* 255 */ Err(())
 ];
 
 #[inline]
-fn value_of_digit(digit: u8) -> Option<u8> {
+fn value_of_digit(digit: u8) -> Result<u8, ()> {
     CONVERSION_TABLE[digit as usize]
 }
 
@@ -122,8 +122,8 @@ pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
     let mut buffer: u16 = !0;
     for digit in zbase32 {
         let value = match value_of_digit(*digit) {
-            Some(v) => v,
-            None => return Err("not a zbase32 digit")
+            Ok(v) => v,
+            Err(()) => return Err("not a zbase32 digit")
         };
         buffer = (buffer << 5) | u16::from(value);
         buffer_size += 5;
@@ -281,7 +281,7 @@ pub fn encode_full_bytes(data: &[u8]) -> String {
 /// assert!(!zbase32::validate(b"A"));
 /// ```
 pub fn validate(data: &[u8]) -> bool {
-    data.iter().all(|i| value_of_digit(*i).is_some())
+    data.iter().all(|i| value_of_digit(*i).is_ok())
 }
 
 /// Check if `data` is valid zbase32 encoded string
@@ -431,7 +431,7 @@ mod tests {
                 assert_eq!(encode(&decode(bytes, 5).unwrap(), 5).as_bytes(), bytes);
                 assert!(validate(bytes));
             } else {
-                assert!(value_of_digit(char).is_none());
+                assert!(value_of_digit(char).is_err());
                 assert!(decode_full_bytes(bytes).is_err());
                 assert!(!validate(bytes));
             }
