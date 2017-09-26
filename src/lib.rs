@@ -35,67 +35,64 @@
 pub const ALPHABET: &[u8; 32] = b"ybndrfg8ejkmcpqxot1uwisza345h769";
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-const CONVERSION_TABLE: &[Option<u8>; 256] = &[
-    /*   0 */ None,       None,       None,       None,       None,
-    /*   5 */ None,       None,       None,       None,       None,
-    /*  10 */ None,       None,       None,       None,       None,
-    /*  15 */ None,       None,       None,       None,       None,
-    /*  20 */ None,       None,       None,       None,       None,
-    /*  25 */ None,       None,       None,       None,       None,
-    /*  30 */ None,       None,       None,       None,       None,
-    /*  35 */ None,       None,       None,       None,       None,
-    /*  40 */ None,       None,       None,       None,       None,
-    /*  45 */ None,       None,       None,       None,       Some(0x12),
-    /*  50 */ None,       Some(0x19), Some(0x1a), Some(0x1b), Some(0x1e),
-    /*  55 */ Some(0x1d), Some(0x07), Some(0x1f), None,       None,
-    /*  60 */ None,       None,       None,       None,       None,
-    /*  65 */ None,       None,       None,       None,       None,
-    /*  70 */ None,       None,       None,       None,       None,
-    /*  75 */ None,       None,       None,       None,       None,
-    /*  80 */ None,       None,       None,       None,       None,
-    /*  85 */ None,       None,       None,       None,       None,
-    /*  90 */ None,       None,       None,       None,       None,
-    /*  95 */ None,       None,       Some(0x18), Some(0x01), Some(0x0c),
-    /* 100 */ Some(0x03), Some(0x08), Some(0x05), Some(0x06), Some(0x1c),
-    /* 105 */ Some(0x15), Some(0x09), Some(0x0a), None,       Some(0x0b),
-    /* 110 */ Some(0x02), Some(0x10), Some(0x0d), Some(0x0e), Some(0x04),
-    /* 115 */ Some(0x16), Some(0x11), Some(0x13), None,       Some(0x14),
-    /* 120 */ Some(0x0f), Some(0x00), Some(0x17), None,       None,
-    /* 125 */ None,       None,       None,       None,       None,
-    /* 130 */ None,       None,       None,       None,       None,
-    /* 135 */ None,       None,       None,       None,       None,
-    /* 140 */ None,       None,       None,       None,       None,
-    /* 145 */ None,       None,       None,       None,       None,
-    /* 150 */ None,       None,       None,       None,       None,
-    /* 155 */ None,       None,       None,       None,       None,
-    /* 160 */ None,       None,       None,       None,       None,
-    /* 165 */ None,       None,       None,       None,       None,
-    /* 170 */ None,       None,       None,       None,       None,
-    /* 175 */ None,       None,       None,       None,       None,
-    /* 180 */ None,       None,       None,       None,       None,
-    /* 185 */ None,       None,       None,       None,       None,
-    /* 190 */ None,       None,       None,       None,       None,
-    /* 195 */ None,       None,       None,       None,       None,
-    /* 200 */ None,       None,       None,       None,       None,
-    /* 205 */ None,       None,       None,       None,       None,
-    /* 210 */ None,       None,       None,       None,       None,
-    /* 215 */ None,       None,       None,       None,       None,
-    /* 220 */ None,       None,       None,       None,       None,
-    /* 225 */ None,       None,       None,       None,       None,
-    /* 230 */ None,       None,       None,       None,       None,
-    /* 235 */ None,       None,       None,       None,       None,
-    /* 240 */ None,       None,       None,       None,       None,
-    /* 245 */ None,       None,       None,       None,       None,
-    /* 250 */ None,       None,       None,       None,       None,
-    /* 255 */ None
+const CONVERSION_TABLE: &[u8; 256] = &[
+    /*   0 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /*   5 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /*  10 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /*  15 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /*  20 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /*  25 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /*  30 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /*  35 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /*  40 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /*  45 */ 0xff, 0xff, 0xff, 0xff, 0x12,
+    /*  50 */ 0xff, 0x19, 0x1a, 0x1b, 0x1e,
+    /*  55 */ 0x1d, 0x07, 0x1f, 0xff, 0xff,
+    /*  60 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /*  65 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /*  70 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /*  75 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /*  80 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /*  85 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /*  90 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /*  95 */ 0xff, 0xff, 0x18, 0x01, 0x0c,
+    /* 100 */ 0x03, 0x08, 0x05, 0x06, 0x1c,
+    /* 105 */ 0x15, 0x09, 0x0a, 0xff, 0x0b,
+    /* 110 */ 0x02, 0x10, 0x0d, 0x0e, 0x04,
+    /* 115 */ 0x16, 0x11, 0x13, 0xff, 0x14,
+    /* 120 */ 0x0f, 0x00, 0x17, 0xff, 0xff,
+    /* 125 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 130 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 135 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 140 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 145 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 150 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 155 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 160 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 165 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 170 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 175 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 180 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 185 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 190 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 195 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 200 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 205 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 210 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 215 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 220 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 225 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 230 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 235 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 240 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 245 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 250 */ 0xff, 0xff, 0xff, 0xff, 0xff,
+    /* 255 */ 0xff
 ];
 
 #[inline]
-fn value_of_digit(digit: u8) -> Result<u8, &'static str> {
-    match CONVERSION_TABLE[digit as usize] {
-        Some(v) => Ok(v),
-        None => Err("not a zbase32 digit"),
-    }
+fn value_of_digit(digit: u8) -> u8 {
+    CONVERSION_TABLE[digit as usize]
 }
 
 /// Decode first N `bits` of given zbase32 encoded data
@@ -124,7 +121,10 @@ pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
     let mut buffer_size: u8 = 0;
     let mut buffer: u16 = !0;
     for digit in zbase32 {
-        let value = value_of_digit(*digit)?;
+        let value = match value_of_digit(*digit) {
+            0xff => return Err("not a zbase32 digit"),
+            v => v
+        };
         buffer = (buffer << 5) | u16::from(value);
         buffer_size += 5;
         if bits_remaining < 8 && u64::from(buffer_size) >= bits_remaining {
@@ -281,7 +281,7 @@ pub fn encode_full_bytes(data: &[u8]) -> String {
 /// assert!(!zbase32::validate(b"A"));
 /// ```
 pub fn validate(data: &[u8]) -> bool {
-    data.iter().all(|i| value_of_digit(*i).is_ok())
+    data.iter().all(|i| value_of_digit(*i) != 0xff)
 }
 
 /// Check if `data` is valid zbase32 encoded string
@@ -427,11 +427,11 @@ mod tests {
         for char in (0_u16..256).map(|i| i as u8) {
             let bytes = &[char];
             if ALPHABET.contains(&char) {
-                assert_eq!(ALPHABET[value_of_digit(char).unwrap() as usize], char);
+                assert_eq!(ALPHABET[value_of_digit(char) as usize], char);
                 assert_eq!(encode(&decode(bytes, 5).unwrap(), 5).as_bytes(), bytes);
                 assert!(validate(bytes));
             } else {
-                assert!(value_of_digit(char).is_err());
+                assert!(value_of_digit(char) == 0xff);
                 assert!(decode_full_bytes(bytes).is_err());
                 assert!(!validate(bytes));
             }
