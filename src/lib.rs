@@ -91,11 +91,8 @@ const CONVERSION_TABLE: &[Option<u8>; 256] = &[
 ];
 
 #[inline]
-fn value_of_digit(digit: u8) -> Result<u8, &'static str> {
-    match CONVERSION_TABLE[digit as usize] {
-        Some(v) => Ok(v),
-        None => Err("not a zbase32 digit"),
-    }
+fn value_of_digit(digit: u8) -> Option<u8> {
+    CONVERSION_TABLE[digit as usize]
 }
 
 /// Decode first N `bits` of given zbase32 encoded data
@@ -124,7 +121,10 @@ pub fn decode(zbase32: &[u8], bits: u64) -> Result<Vec<u8>, &'static str> {
     let mut buffer_size: u8 = 0;
     let mut buffer: u16 = !0;
     for digit in zbase32 {
-        let value = value_of_digit(*digit)?;
+        let value = match value_of_digit(*digit) {
+            Some(v) => v,
+            None => return Err("not a zbase32 digit")
+        };
         buffer = (buffer << 5) | u16::from(value);
         buffer_size += 5;
         if bits_remaining < 8 && u64::from(buffer_size) >= bits_remaining {
@@ -281,7 +281,7 @@ pub fn encode_full_bytes(data: &[u8]) -> String {
 /// assert!(!zbase32::validate(b"A"));
 /// ```
 pub fn validate(data: &[u8]) -> bool {
-    data.iter().all(|i| value_of_digit(*i).is_ok())
+    data.iter().all(|i| value_of_digit(*i).is_some())
 }
 
 /// Check if `data` is valid zbase32 encoded string
@@ -431,7 +431,7 @@ mod tests {
                 assert_eq!(encode(&decode(bytes, 5).unwrap(), 5).as_bytes(), bytes);
                 assert!(validate(bytes));
             } else {
-                assert!(value_of_digit(char).is_err());
+                assert!(value_of_digit(char).is_none());
                 assert!(decode_full_bytes(bytes).is_err());
                 assert!(!validate(bytes));
             }
