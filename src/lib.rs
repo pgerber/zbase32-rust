@@ -92,7 +92,9 @@ const CONVERSION_TABLE: &[u8; 256] = &[
 
 #[inline]
 fn value_of_digit(digit: u8) -> u8 {
-    CONVERSION_TABLE[digit as usize]
+    let val = CONVERSION_TABLE[digit as usize];
+    debug_assert!(val <= 0x1f || val == 0xff);
+    val
 }
 
 /// Decode first N `bits` of given zbase32 encoded data
