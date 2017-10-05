@@ -4,7 +4,9 @@ rust:
   - stable
   - beta
   - nightly
-env: LD_LIBRARY_PATH=/opt/python/3.6.0/lib/
+env: |
+    LD_LIBRARY_PATH=/opt/python/3.6.0/lib/
+    RUSTFLAGS="-C link-dead-code"
 matrix:
   allow_failures:
     - rust: nightly
