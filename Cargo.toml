@@ -15,9 +15,9 @@ travis-ci = { repository = "pgerber/zbase32-rust" }
 clippy = { version = "0.0", optional = true }
 
 [dev-dependencies]
-cpython = "0.1"
-quickcheck = "0.4"
-rand = "0.3"
+cpython = "0.2"
+quickcheck = "0.6"
+rand = "0.4"
 
 [features]
 python_tests = []
