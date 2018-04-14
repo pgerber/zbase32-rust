@@ -4,9 +4,14 @@ rust:
   - stable
   - beta
   - nightly
-env: |
-    LD_LIBRARY_PATH=/opt/python/3.6.0/lib/
-    RUSTFLAGS="-C link-dead-code"
+env:
+    global:
+      - LD_LIBRARY_PATH=/opt/python/3.6.0/lib/
+      - RUSTFLAGS="-C link-dead-code"
+      - QUICKCHECK_GENERATOR_SIZE=4096
+      - QUICKCHECK_MAX_TESTS=100000
+      - QUICKCHECK_TESTS=5000
+      - QUICKCHECK_MIN_TESTS_PASSED=3
 matrix:
   allow_failures:
     - rust: nightly
