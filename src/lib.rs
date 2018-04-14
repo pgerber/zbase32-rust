@@ -343,18 +343,18 @@ mod tests {
     #[test]
     #[cfg_attr(rustfmt, rustfmt_skip)]
     fn test_decode_full_bytes() {
-        let test_data: &[(&[u8], &[u8])] = &[
-            (b"9",     &[]),
-            (b"y9",    &[0x07]),
-            (b"6n9hq", &[0xf0, 0xbf, 0xc7]),
-            (b"4t7ye", &[0xd4, 0x7a, 0x04]),
-            (b"ybndrfg8ejkmcpqxot1uwisza345h769", &[0x00, 0x44, 0x32, 0x14, 0xc7, 0x42, 0x54, 0xb6,
-                                                    0x35, 0xcf, 0x84, 0x65, 0x3a, 0x56, 0xd7, 0xc6,
-                                                    0x75, 0xbe, 0x77, 0xdf])
+        let test_data: &[(&str, &[u8])] = &[
+            ("9",     &[]),
+            ("y9",    &[0x07]),
+            ("6n9hq", &[0xf0, 0xbf, 0xc7]),
+            ("4t7ye", &[0xd4, 0x7a, 0x04]),
+            ("ybndrfg8ejkmcpqxot1uwisza345h769", &[0x00, 0x44, 0x32, 0x14, 0xc7, 0x42, 0x54, 0xb6,
+                                                   0x35, 0xcf, 0x84, 0x65, 0x3a, 0x56, 0xd7, 0xc6,
+                                                   0x75, 0xbe, 0x77, 0xdf])
         ];
 
         for &(zbase32, data) in test_data {
-            assert_eq!(decode_full_bytes(zbase32).unwrap(), data);
+            assert_eq!(decode_full_bytes_str(zbase32).unwrap(), data);
         }
     }
 
